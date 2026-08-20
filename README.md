@@ -42,6 +42,10 @@ chọn repo vừa tạo → **Deploy**. Không cần chỉnh gì, để mặc đ
 Trong project vừa tạo: tab **Storage** → **Create Database** → chọn **Blob** → **Connect**.
 Vercel tự thêm biến `BLOB_READ_WRITE_TOKEN`, bạn không phải copy gì cả.
 
+Để kho ở dạng **Private** (mặc định). File JSON chứa cả mã QR ngân hàng của bạn —
+private nghĩa là chỉ hàm `api/data.js` đọc được, người ngoài có link blob cũng chịu.
+Lỡ tạo dạng Public thì thêm biến môi trường `BLOB_ACCESS=public` ở bước 4.
+
 **4. Đặt mật khẩu**
 
 Tab **Settings → Environment Variables** → thêm:
@@ -90,6 +94,24 @@ chọn lấy bản nào. Không bao giờ âm thầm mất dữ liệu.
 
 **Backup**: tab Thu tiền có *Xuất JSON* và *Tải bản HTML tĩnh* (file chạy độc lập, mở bằng
 `file://` cũng xem được, phòng khi Vercel hỏng).
+
+---
+
+## Gặp lỗi?
+
+Thanh dưới màn hình hiện lỗi gì thì chữa theo đó:
+
+| Báo lỗi | Nguyên nhân |
+|---|---|
+| `Kho Blob chưa được nối` | Bỏ qua bước 3, hoặc nối rồi mà quên Redeploy ở bước 5 |
+| `Kiểu truy cập của kho không khớp` | Kho tạo dạng Public → thêm `BLOB_ACCESS=public` rồi Redeploy |
+| `Sai mật khẩu` | `ADMIN_PASS` chưa đặt, hoặc đặt xong chưa Redeploy |
+| `Sổ đã bị sửa ở nơi khác` | Không phải lỗi — bạn đang mở 2 tab/2 máy. Chọn giữ bản nào. |
+
+Kiểm tra nhanh bằng `curl https://<project>.vercel.app/api/data` — ra `{"rev":0,...}` là ngon.
+
+Biến môi trường **chỉ nạp lúc deploy**. Đổi env xong mà không Redeploy thì bản đang chạy
+vẫn dùng cấu hình cũ — đây là chỗ hay vướng nhất.
 
 ---
 

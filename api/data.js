@@ -7,22 +7,26 @@
  * Mật khẩu nằm ở biến môi trường ADMIN_PASS trên Vercel — không có trong code,
  * không lộ ra trình duyệt. Người xem không cần gì cả, chỉ gọi GET.
  *
+ * Kho Blob để PRIVATE: file JSON chứa cả mã QR ngân hàng, không nên ai có link
+ * blob cũng tải thẳng được. Chỉ hàm này (có token) mới đọc/ghi được.
+ * Nếu kho của bạn lỡ tạo dạng public, thêm biến môi trường BLOB_ACCESS=public.
+ *
  * Chống đè nhau: mỗi lần ghi rev tăng 1. Client phải gửi đúng rev nó đọc được.
  * Lệch rev = ai đó vừa sửa ở nơi khác → trả 409 kèm bản trên server.
  */
-import { put, list } from "@vercel/blob";
+import { put, get } from "@vercel/blob";
 import { timingSafeEqual } from "crypto";
 
 const BLOB_NAME = "so-caulong.json";
+const ACCESS = process.env.BLOB_ACCESS === "public" ? "public" : "private";
 const MAX_BYTES = 3 * 1024 * 1024;           // chặn payload quá to (ảnh đại diện + QR)
 const EMPTY = { v: 3, sessions: [], members: [], flags: {}, qr: "", note: "" };
 
 async function readStore() {
-  const { blobs } = await list({ prefix: BLOB_NAME, limit: 1 });
-  if (!blobs.length) return { rev: 0, updatedAt: null, data: EMPTY };
-  const r = await fetch(blobs[0].url, { cache: "no-store" });
-  if (!r.ok) throw new Error("Không đọc được kho dữ liệu (" + r.status + ")");
-  const j = await r.json();
+  // useCache:false → luôn đọc bản mới nhất từ kho, không dính bản cũ ở CDN
+  const r = await get(BLOB_NAME, { access: ACCESS, useCache: false });
+  if (!r || !r.stream) return { rev: 0, updatedAt: null, data: EMPTY };
+  const j = await new Response(r.stream).json();
   return {
     rev: typeof j.rev === "number" ? j.rev : 0,
     updatedAt: j.updatedAt || null,
@@ -32,11 +36,10 @@ async function readStore() {
 
 async function writeStore(payload) {
   await put(BLOB_NAME, JSON.stringify(payload), {
-    access: "public",
+    access: ACCESS,
     contentType: "application/json",
     addRandomSuffix: false,
     allowOverwrite: true,
-    cacheControlMaxAge: 0,                   // luôn lấy bản mới nhất, không để CDN giữ
   });
 }
 
@@ -47,6 +50,17 @@ function passOk(given) {
   const b = Buffer.from(want, "utf8");
   if (a.length !== b.length) return false;   // độ dài khác nhau thì khỏi so
   return timingSafeEqual(a, b);
+}
+
+/* Lỗi cấu hình hay gặp — nói thẳng cách chữa thay vì ném nguyên văn tiếng Anh */
+function friendly(msg) {
+  if (/No token found/i.test(msg))
+    return "Kho Blob chưa được nối. Vercel → Storage → Create Database → Blob → Connect, rồi Redeploy.";
+  if (/private access|public access/i.test(msg))
+    return "Kiểu truy cập của kho không khớp. Kho đang là " +
+      (ACCESS === "private" ? "public → thêm biến môi trường BLOB_ACCESS=public rồi Redeploy"
+                            : "private → xóa biến BLOB_ACCESS rồi Redeploy") + ". (" + msg + ")";
+  return msg;
 }
 
 export default async function handler(req, res) {
@@ -89,6 +103,6 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET, POST");
     return res.status(405).json({ error: "Method không hỗ trợ." });
   } catch (e) {
-    return res.status(500).json({ error: String((e && e.message) || e) });
+    return res.status(500).json({ error: friendly(String((e && e.message) || e)) });
   }
 }

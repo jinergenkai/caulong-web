@@ -5,6 +5,6 @@
   "type": "module",
   "description": "So Cau Long - trang xem cong khai + quan tri co mat khau",
   "dependencies": {
-    "@vercel/blob": "^1.0.0"
+    "@vercel/blob": "^2.8.0"
   }
 }
