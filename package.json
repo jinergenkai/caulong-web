@@ -1,0 +1,10 @@
+{
+  "name": "caulong-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "So Cau Long - trang xem cong khai + quan tri co mat khau",
+  "dependencies": {
+    "@vercel/blob": "^1.0.0"
+  }
+}
