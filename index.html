@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#256E4E" />
 <meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23256E4E'/%3E%3Cpath d='M5 18.5c1.4-1 3.8-3.3 6.1-5.6' stroke='white' stroke-width='1.7' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='16.5' cy='7.5' r='3.4' fill='none' stroke='white' stroke-width='1.5'/%3E%3Cpath d='M14.1 5.1l4.8 4.8M16.5 4.1v6.8M13.1 7.5h6.8' stroke='white' stroke-width='.9'/%3E%3C/svg%3E" />
 <title>Sổ Cầu Lông</title>
 <style>
   :root{
@@ -305,7 +306,7 @@ function readCache(){
   try{ const raw=localStorage.getItem(CACHE_KEY); if(!raw)return null; return JSON.parse(raw); }catch(e){ return null; }
 }
 function writeCache(){
-  try{ localStorage.setItem(CACHE_KEY,JSON.stringify({rev,updatedAt,data:st})); }catch(e){}
+  try{ localStorage.setItem(CACHE_KEY,JSON.stringify({rev,updatedAt,data:st,dirty})); }catch(e){}
 }
 async function fetchData(){
   const r=await fetch("api/data",{cache:"no-store"});
@@ -316,13 +317,30 @@ async function fetchData(){
 }
 async function boot(){
   const c=readCache();
-  if(c){ try{ st=migrate(c.data); rev=c.rev||0; updatedAt=c.updatedAt||null; fromCache=true; render(); }catch(e){} }
+  let unsaved=false;
+  if(c){ try{ st=migrate(c.data); rev=c.rev||0; updatedAt=c.updatedAt||null;
+    fromCache=true; unsaved=!!c.dirty; render(); }catch(e){} }
   if(typeof window.__DATA__!=="undefined"){       // bản tĩnh xuất ra để backup
     st=migrate(window.__DATA__.data||window.__DATA__);
     rev=window.__DATA__.rev||0; updatedAt=window.__DATA__.updatedAt||null;
     online=false; fromCache=false; render(); return;
   }
-  try{ await fetchData(); }
+  try{
+    const r=await fetch("api/data",{cache:"no-store"});
+    if(!r.ok){
+      const j=await r.json().catch(()=>({}));
+      throw new Error("HTTP "+r.status+(j.error?" — "+j.error:""));
+    }
+    const j=await r.json();
+    /* Có thay đổi chưa lưu từ lần trước (mạng hỏng / server lỗi) mà bản trên web lại khác:
+       không được im lặng đè lên — đưa cho người dùng chọn. */
+    if(unsaved&&isAdmin&&JSON.stringify(j.data)!==JSON.stringify(st)){
+      online=true; loadErr=""; fromCache=false; dirty=true; render();
+      return conflictDialog({rev:j.rev||0,updatedAt:j.updatedAt||null,data:j.data});
+    }
+    st=migrate(j.data); rev=j.rev||0; updatedAt=j.updatedAt||null;
+    online=true; loadErr=""; fromCache=false; dirty=false; writeCache();
+  }
   catch(e){ online=false; loadErr=e.message||String(e);
     if(!st){ st=migrate({v:3,sessions:[],members:[],flags:{},qr:"",note:""}); } }
   render();
@@ -431,7 +449,14 @@ function render(){
   renderTabs(); renderStamp(); renderSaveBar();
   const app=document.getElementById("app");
   let banner="";
-  if(loadErr&&!online) banner=`<div class="banner off">⚠ Không kết nối được máy chủ${fromCache?" — đang xem số liệu đã lưu trong máy":""}. Kéo xuống để tải lại sau.</div>`;
+  if(loadErr&&!online){
+    /* Phân biệt "mạng của bạn hỏng" với "máy chủ trả lỗi" — hai thứ này chữa khác nhau hẳn. */
+    const srvErr=/^HTTP [45]/.test(loadErr);
+    banner=`<div class="banner ${srvErr?"err":"off"}">⚠ ${srvErr
+      ?`Máy chủ báo lỗi — <span class="num">${esc(loadErr.replace(/\.+$/,""))}</span>`
+      :"Không kết nối được máy chủ (mất mạng?)"}${
+      fromCache?". Đang xem số liệu đã lưu trong máy.":"."}</div>`;
+  }
   else if(fromCache) banner=`<div class="banner off">Đang tải số mới nhất…</div>`;
   app.innerHTML=banner+`<div id="body"></div>`;
   const body=document.getElementById("body");
