@@ -69,6 +69,20 @@
     border-radius:50%;font-family:inherit;}
   button.avbtn.arm{outline:2px solid var(--amber);outline-offset:2px;}
   button.avbtn.drop{outline:2px dashed var(--court);outline-offset:2px;}
+  button.picbtn{padding:0;border:none;background:none;cursor:pointer;flex:0 0 auto;line-height:0;
+    border-radius:10px;font-family:inherit;}
+  button.picbtn:active{transform:scale(.96);}
+  button.picbtn img{border-radius:10px;object-fit:cover;box-shadow:inset 0 0 0 1px rgba(23,33,29,.12);}
+  button.picbtn.arm{outline:2px solid var(--amber);outline-offset:2px;}
+  button.picbtn.drop{outline:2px dashed var(--court);outline-offset:2px;}
+  .picph{border:1.5px dashed var(--court-line);border-radius:10px;display:flex;align-items:center;
+    justify-content:center;color:var(--court-line);font-size:19px;font-weight:700;line-height:1;}
+  .picbar{position:fixed;left:50%;transform:translateX(-50%);bottom:64px;z-index:70;
+    background:var(--ink);color:#fff;border-radius:13px;padding:9px 11px;font-size:12.5px;
+    display:flex;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(23,33,29,.3);max-width:min(94vw,520px);}
+  .picbar button{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;
+    padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex:0 0 auto;}
+  .picbar kbd{background:rgba(255,255,255,.16);border-radius:5px;padding:1px 5px;font-family:var(--mono);font-size:11px;}
 
   .stat{background:linear-gradient(180deg,#fff,var(--court-tint));border-color:var(--court-line);}
   .stat .big{font-size:27px;font-weight:700;letter-spacing:-.5px;line-height:1.15;}
@@ -188,6 +202,7 @@
 <div class="wrap"><div id="app"><div class="card"><div class="empty">Đang tải sổ…</div></div></div></div>
 <footer id="foot"></footer>
 <div id="overlay"></div>
+<div id="pic-bar"></div>
 <input type="file" id="av-file" accept="image/*" class="hide" />
 <input type="file" id="json-file" accept="application/json,.json" class="hide" />
 <input type="file" id="qr-file" accept="image/*" class="hide" />
@@ -198,7 +213,7 @@
 /* ══════════════════════════════════════════════════════════════════
    1. LÕI — model + tính tiền.  Giống hệt app gốc, không đổi công thức.
    ══════════════════════════════════════════════════════════════════ */
-const DEFAULT_PRICE=30, LEGACY="legacy", AV_SIZE=96, EPS=0.05;
+const DEFAULT_PRICE=30, LEGACY="legacy", AV_SIZE=96, PHOTO_SIZE=340, LOG_MAX=250, EPS=0.05;
 const CACHE_KEY="caulong_cache", PASS_KEY="caulong_pass", ME_KEY="caulong_me";
 
 function id(){ return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3); }
@@ -221,10 +236,12 @@ function migrate(o){
   o.flags=(o.flags&&typeof o.flags==="object"&&!Array.isArray(o.flags))?o.flags:{};
   o.qr=typeof o.qr==="string"?o.qr:"";
   o.note=typeof o.note==="string"?o.note:"";
+  o.log=Array.isArray(o.log)?o.log.filter(e=>e&&e.t&&e.m).slice(-LOG_MAX):[];
   o.sessions.forEach(s=>{
     s.id=s.id||id(); s.date=s.date==null?"":String(s.date);
     s.court=+s.court||0; s.shuttles=+s.shuttles||0; s.price=+s.price||DEFAULT_PRICE;
     s.parts=Array.isArray(s.parts)?s.parts:[];
+    s.photo=typeof s.photo==="string"?s.photo:"";     // ảnh buổi chơi, để lâu còn nhớ
     if(!s.paid||typeof s.paid!=="object"||Array.isArray(s.paid)) s.paid={};
   });
   if(o.paid&&typeof o.paid==="object"&&!Array.isArray(o.paid)){
@@ -346,27 +363,92 @@ async function boot(){
   render();
 }
 
-/* lưu: gộp các thay đổi liên tiếp, tự đẩy sau 1.2s */
-let dirty=false, saving=false, saveErr="", savedAt=null, saveTimer=null;
-function touch(){ dirty=true; writeCache(); clearTimeout(saveTimer); saveTimer=setTimeout(push,1200); renderSaveBar(); }
-async function push(force){
-  if(!isAdmin||saving) return;
+/* Lưu: gộp các thay đổi liên tiếp rồi đẩy lên.
+   Đang gửi dở mà có thay đổi mới thì XẾP HÀNG, tuyệt đối không vứt.
+   (Bỏ rơi một lần lưu chính là thứ đẻ ra "conflict" bí ẩn ở lần mở sau:
+    cache còn dirty, server thì đã khác, mà không ai biết khác chỗ nào.) */
+const SAVE_DELAY=1200, RETRY_DELAY=4000, MAX_RETRY=3;
+let dirty=false, saving=false, saveErr="", savedAt=null, saveTimer=null, retries=0, localSeq=0;
+function touch(){ dirty=true; localSeq++; writeCache(); renderSaveBar(); schedulePush(); }
+/* Nhật ký sửa đổi. Nằm trong chính cục dữ liệu nên không tốn thêm lần đọc/ghi nào.
+   Thao tác giống hệt lặp lại trong 1 phút thì gộp (vd gõ số tài khoản từng ký tự). */
+function logAdd(msg){
+  if(!Array.isArray(st.log)) st.log=[];
+  const last=st.log[st.log.length-1];
+  if(last&&last.m===msg&&Date.now()-new Date(last.t).getTime()<60000) last.t=new Date().toISOString();
+  else st.log.push({t:new Date().toISOString(),m:msg});
+  if(st.log.length>LOG_MAX) st.log=st.log.slice(-LOG_MAX);
+}
+const act=msg=>{ logAdd(msg); touch(); };   // ghi nhật ký rồi lưu
+function schedulePush(ms){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>push(),ms||SAVE_DELAY); }
+async function push(forceRev){
+  if(!isAdmin) return;
+  if(saving) return;                          // đang gửi; xong sẽ tự kiểm lại localSeq
   clearTimeout(saveTimer);
   saving=true; saveErr=""; renderSaveBar();
+  /* Thân request được đóng gói NGAY LÚC NÀY. Thay đổi xảy ra sau đây mà trước khi
+     phản hồi về thì KHÔNG nằm trong gói — nên chỉ được xóa cờ dirty nếu localSeq
+     không nhúc nhích. Thiếu chốt này là mất thay đổi mà không ai hay. */
+  const seq=localSeq;
+  let conflict=null;
   try{
     const r=await fetch("api/data",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({pass,rev:force?force:rev,data:st})});
+      body:JSON.stringify({pass,rev:forceRev===undefined?rev:forceRev,data:st})});
     const j=await r.json().catch(()=>({}));
-    if(r.status===409){ saving=false; renderSaveBar(); return conflictDialog(j.server); }
-    if(!r.ok) throw new Error(j.error||("HTTP "+r.status));
-    rev=j.rev; updatedAt=j.updatedAt; dirty=false; savedAt=Date.now(); online=true; writeCache();
+    if(r.status===409) conflict=j.server||null;
+    else if(!r.ok) throw new Error(j.error||("HTTP "+r.status));
+    else { rev=j.rev; updatedAt=j.updatedAt; savedAt=Date.now(); online=true; retries=0;
+           if(localSeq===seq) dirty=false;     // không có gì xen vào → coi như sạch
+           writeCache(); }
   }catch(e){ saveErr=e.message||String(e); }
   saving=false; renderSaveBar(); renderStamp();
+  if(conflict) return conflictDialog(conflict);
+  if(saveErr){ if(retries<MAX_RETRY){ retries++; schedulePush(RETRY_DELAY); } return; }
+  if(dirty) schedulePush(200);                // còn thay đổi chưa gửi → gửi tiếp ngay
+}
+/* Liệt kê đúng những chỗ hai bản khác nhau — để không phải đoán khi gặp conflict. */
+function diffSummary(mine,theirs){
+  const out=[];
+  const nm=(d,mid)=>{ const m=(d.members||[]).find(x=>x.id===mid); return m?m.name:"(ai đó)"; };
+  const map=d=>new Map((d.sessions||[]).map(s=>[s.id,s]));
+  const A=map(mine), B=map(theirs);
+  A.forEach((s,k)=>{ if(!B.has(k)) out.push(`Buổi <b>${esc(s.date||"?")}</b>: chỉ có ở máy này`); });
+  B.forEach((s,k)=>{ if(!A.has(k)) out.push(`Buổi <b>${esc(s.date||"?")}</b>: chỉ có trên web`); });
+  A.forEach((a,k)=>{
+    const b=B.get(k); if(!b) return;
+    const d=esc(a.date||"?");
+    if(a.court!==b.court||a.shuttles!==b.shuttles||a.price!==b.price||a.date!==b.date)
+      out.push(`Buổi <b>${d}</b>: tiền hoặc ngày khác nhau`);
+    if((a.parts||[]).length!==(b.parts||[]).length)
+      out.push(`Buổi <b>${d}</b>: số người khác (${a.parts.length} ở máy này / ${b.parts.length} trên web)`);
+    Object.keys(a.paid||{}).forEach(mid=>{ if(!(b.paid||{})[mid])
+      out.push(`Buổi <b>${d}</b> · ${esc(nm(mine,mid))}: <b>máy này</b> ghi đã trả, web chưa`); });
+    Object.keys(b.paid||{}).forEach(mid=>{ if(!(a.paid||{})[mid])
+      out.push(`Buổi <b>${d}</b> · ${esc(nm(theirs,mid))}: <b>web</b> ghi đã trả, máy này chưa`); });
+    if((a.photo||"")!==(b.photo||"")) out.push(`Buổi <b>${d}</b>: ảnh buổi chơi khác nhau`);
+  });
+  const mA=new Map((mine.members||[]).map(m=>[m.id,m])), mB=new Map((theirs.members||[]).map(m=>[m.id,m]));
+  mA.forEach((m,k)=>{ if(!mB.has(k)) out.push(`Người <b>${esc(m.name)}</b>: chỉ có ở máy này`); });
+  mB.forEach((m,k)=>{ if(!mA.has(k)) out.push(`Người <b>${esc(m.name)}</b>: chỉ có trên web`); });
+  mA.forEach((m,k)=>{ const o=mB.get(k); if(!o) return;
+    if(m.name!==o.name) out.push(`Tên khác: "<b>${esc(m.name)}</b>" ở máy này / "<b>${esc(o.name)}</b>" trên web`);
+    if((m.av||"")!==(o.av||"")) out.push(`Ảnh đại diện của <b>${esc(m.name)}</b> khác nhau`); });
+  if((mine.note||"")!==(theirs.note||"")) out.push("Thông tin ngân hàng khác nhau");
+  if((mine.qr||"")!==(theirs.qr||"")) out.push("Mã QR khác nhau");
+  return out;
 }
 function conflictDialog(server){
+  const lines=server&&server.data?diffSummary(st,server.data):[];
+  const show=lines.slice(0,10);
+  const when=server&&server.updatedAt?new Date(server.updatedAt).toLocaleString("vi-VN"):"?";
   overlay(`<div class="sheet">
     <b style="font-size:16px">Sổ đã bị sửa ở nơi khác</b>
-    <p class="small muted">Có bản mới hơn trên web (phiên bản ${server?server.rev:"?"}, lúc ${server&&server.updatedAt?new Date(server.updatedAt).toLocaleString("vi-VN"):"?"}). Nếu bạn mở app ở tab/máy khác thì đó là nguyên nhân.</p>
+    <p class="small muted">Trên web đang là phiên bản <b>${server?server.rev:"?"}</b> (lúc ${esc(when)}), máy này giữ phiên bản <b>${rev}</b>. Thường là do bạn mở app ở tab/máy khác.</p>
+    ${show.length?`<div class="card" style="margin:0 0 10px;background:var(--paper)">
+      <div class="tiny muted b" style="letter-spacing:.5px;margin-bottom:6px">KHÁC NHAU Ở ${lines.length} CHỖ</div>
+      <div class="small" style="line-height:1.9">${show.map(l=>"• "+l).join("<br>")}
+      ${lines.length>show.length?`<div class="tiny muted" style="margin-top:6px">…và ${lines.length-show.length} chỗ nữa</div>`:""}</div></div>`
+      :`<div class="card small muted" style="margin:0 0 10px;background:var(--paper)">Nội dung hai bản giống nhau — chỉ lệch số phiên bản. Chọn cách nào cũng không mất gì.</div>`}
     <button class="primary" id="cf-take" style="margin-bottom:8px">Lấy bản trên web (bỏ thay đổi đang sửa)</button>
     <button class="ghost" id="cf-force" style="width:100%">Ghi đè bằng bản của tôi</button>
     <div class="tiny muted" style="margin-top:8px">Ghi đè sẽ xóa thay đổi mà bản kia vừa lưu. Chỉ chọn khi chắc chắn.</div>
@@ -403,11 +485,12 @@ function toast(msg,undo){
   document.body.appendChild(el);
   toastTimer=setTimeout(()=>el.remove(),undo?7000:2600);
 }
-function collect(pairs){
+function collect(pairs,label){
   const before=pairs.map(p=>({s:p.s,mid:p.mid,prev:p.s.paid?p.s.paid[p.mid]:undefined}));
-  pairs.forEach(p=>setPaid(p.s,p.mid,true)); touch();
+  pairs.forEach(p=>setPaid(p.s,p.mid,true));
+  act(label||"Ghi nhận đã trả");
   return ()=>{ before.forEach(b=>{ if(b.prev===undefined) delete b.s.paid[b.mid]; else b.s.paid[b.mid]=b.prev; });
-    touch(); render(); toast("Đã hoàn tác."); };
+    act("Hoàn tác: "+(label||"ghi nhận đã trả")); render(); toast("Đã hoàn tác."); };
 }
 function renderStamp(){
   const el=document.getElementById("stamp");
@@ -421,7 +504,8 @@ function renderSaveBar(){
   document.querySelectorAll(".savebar").forEach(x=>x.remove());
   if(!isAdmin) return;
   let cls="",dot="",txt="";
-  if(saveErr){ cls=" err"; dot=" bad"; txt="Lưu lỗi: "+saveErr; }
+  if(saveErr){ cls=" err"; dot=" bad";
+    txt="Lưu lỗi: "+saveErr+(retries&&retries<MAX_RETRY?` (đang thử lại lần ${retries}…)`:""); }
   else if(saving){ dot=" wait"; txt="Đang lưu lên web…"; }
   else if(dirty){ dot=" wait"; txt="Có thay đổi chưa lưu"; }
   else txt="Đã lưu"+(savedAt?" lúc "+new Date(savedAt).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"}):"")+" · phiên bản "+rev;
@@ -446,7 +530,7 @@ function renderTabs(){
   });
 }
 function render(){
-  renderTabs(); renderStamp(); renderSaveBar();
+  renderTabs(); renderStamp(); renderSaveBar(); renderPicBar();
   const app=document.getElementById("app");
   let banner="";
   if(loadErr&&!online){
@@ -546,9 +630,12 @@ function viewMe(root){
 
   html+=`<h2 class="sec">${due>EPS?`Các buổi chưa trả · ${dueSes.length}`:"Các buổi"}</h2>`;
   html+=dueSes.map(s=>`<div class="card">
+      <div class="row" style="align-items:flex-start;gap:10px">${sessionPhoto(s,42)}
+        <div style="flex:1;min-width:0">
       <div class="between"><b>${esc(s.date||"—")}</b><b class="num due">${fmt(shareIn(s,m.id))}</b></div>
       <div class="small muted num" style="margin-top:2px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${numStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất${
         (s.parts.find(p=>p.mid===m.id)||{}).weight!==1?` × ${numStr((s.parts.find(p=>p.mid===m.id)||{}).weight)} suất của bạn`:""}</div>
+        </div></div>
     </div>`).join("")||`<div class="card"><div class="empty">Không có buổi nào đang nợ.</div></div>`;
 
   if(paidSes.length){
@@ -574,6 +661,7 @@ function viewMe(root){
 
   const rc=document.getElementById("ref-copy");
   if(rc) rc.onclick=()=>copy(payRef(m),"Đã chép nội dung chuyển khoản");
+  bindPics(root);
   document.getElementById("me-img").onclick=()=>exportPersonImage(m);
   document.getElementById("me-change").onclick=()=>{ me=null; try{localStorage.removeItem(ME_KEY);}catch(e){} render(); };
   document.getElementById("me-link").onclick=()=>copy(location.origin+location.pathname+"?me="+m.id,"Đã chép link riêng của "+m.name);
@@ -654,9 +742,13 @@ function viewSessions(root){
     orderedSessions().map(s=>{
       const settled=sSettled(s), got=sCollected(s), tot=sTotal(s);
       return `<div class="card ${settled?"done":""}">
-        <div class="between"><div><b>${esc(s.date||"—")}</b>
-          <span class="muted small"> · ${s.parts.length} người</span></div>
-          <div class="num b">${fmt(tot)}</div></div>
+        <div class="row" style="align-items:flex-start;gap:10px">
+          ${sessionPhoto(s,46)}
+          <div style="flex:1;min-width:0"><div class="between">
+            <div><b>${esc(s.date||"—")}</b>
+              <span class="muted small"> · ${s.parts.length} người</span></div>
+            <div class="num b">${fmt(tot)}</div></div></div>
+        </div>
         <div class="small muted num" style="margin-top:3px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${numStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất</div>
         <div class="bar"><i style="width:${tot>EPS?Math.round(got/tot*100):0}%"></i></div>
         <div class="small">${settled?`<span class="ok b">✓ Đã thu đủ</span>`
@@ -669,6 +761,7 @@ function viewSessions(root){
         }).join("")}</div>
       </div>`;
     }).join("")||`<div class="card"><div class="empty">Chưa có buổi nào.</div></div>`;
+  bindPics(root);
 }
 
 function copy(text,msg){
@@ -860,7 +953,7 @@ function showImage(canvas,filename){
 /* ══════════════════════════════════════════════════════════════════
    6. QUẢN TRỊ
    ══════════════════════════════════════════════════════════════════ */
-let editingId=null, draft=null, sessFilter="open", openMember=null, memFilter="due", sel=new Set(), avTarget=null;
+let editingId=null, draft=null, sessFilter="open", openMember=null, memFilter="due", sel=new Set(), picTarget=null, logShow=15;
 const val=i=>document.getElementById(i)?.value??"";
 const numVal=i=>{ const v=document.getElementById(i)?.value; return v===""||v==null?0:v; };
 
@@ -889,8 +982,13 @@ function adminSessions(root){
   list.forEach(s=>{
     const settled=sSettled(s), d=sDue(s), got2=sCollected(s), tot=sTotal(s);
     html+=`<div class="card ${settled?"done":""}">
-      <div class="between"><div><b>${esc(s.date||"(chưa đặt ngày)")}</b>
-        <span class="muted small"> · ${s.parts.length} người</span></div><div class="num b">${fmt(tot)}</div></div>
+      <div class="row" style="align-items:flex-start;gap:10px">
+        ${sessionPhoto(s,46)}
+        <div style="flex:1;min-width:0"><div class="between">
+          <div><b>${esc(s.date||"(chưa đặt ngày)")}</b>
+            <span class="muted small"> · ${s.parts.length} người</span></div>
+          <div class="num b">${fmt(tot)}</div></div></div>
+      </div>
       <div class="small muted num" style="margin-top:3px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${numStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất</div>
       <div class="bar"><i style="width:${tot>EPS?Math.round(got2/tot*100):0}%"></i></div>
       <div class="small">${settled?`<span class="ok b">✓ Đã thu đủ</span>`
@@ -917,27 +1015,32 @@ function adminSessions(root){
   root.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{ sessFilter=b.dataset.f; render(); });
   root.querySelectorAll("[data-pay-s]").forEach(b=>b.onclick=()=>{
     const s=S_(b.dataset.payS), mid=b.dataset.payM; if(!s)return;
-    const on=isPaid(s,mid); setPaid(s,mid,!on); touch(); render();
-    if(!on) toast(`${memById(mid)?.name||"?"} đã trả ${fmt(shareIn(s,mid))} · buổi ${s.date||"?"}`);
+    const on=isPaid(s,mid), who=memById(mid)?.name||"?", tien=fmt(shareIn(s,mid));
+    setPaid(s,mid,!on);
+    act(`${on?"Bỏ dấu đã trả":"Đánh dấu đã trả"}: ${who} · buổi ${s.date||"?"} · ${tien}`);
+    render();
+    if(!on) toast(`${who} đã trả ${tien} · buổi ${s.date||"?"}`);
   });
   root.querySelectorAll("[data-payall]").forEach(b=>b.onclick=()=>{
     const s=S_(b.dataset.payall); if(!s)return;
     const mids=sUnpaid(s); if(!mids.length)return;
-    const amt=sDue(s), undo=collect(mids.map(mid=>({s,mid})));
+    const amt=sDue(s);
+    const undo=collect(mids.map(mid=>({s,mid})),`Thu hết buổi ${s.date||"?"}: ${mids.length} người · ${fmt(amt)}`);
     render(); toast(`Đã thu ${fmt(amt)} từ ${mids.length} người · buổi ${s.date||"?"}`,undo);
   });
   root.querySelectorAll("[data-reopen]").forEach(b=>b.onclick=()=>{
     const s=S_(b.dataset.reopen); if(!s)return;
     if(!confirm(`Bỏ dấu "đã trả" của cả ${s.parts.length} người trong buổi ${s.date||"?"}?`))return;
-    s.paid={}; touch(); render();
+    s.paid={}; act(`Bỏ dấu đã trả cả buổi ${s.date||"?"} (${s.parts.length} người)`); render();
   });
   root.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openForm(b.dataset.edit));
   root.querySelectorAll("[data-delsession]").forEach(b=>b.onclick=()=>{
     const s=S_(b.dataset.delsession); if(!s)return;
     if(!confirm(`Xóa buổi ${s.date||"?"}?\n\nLịch sử đã thu ${fmt(sCollected(s))} của buổi này cũng mất.\nChỉ muốn dọn màn hình thì dùng bộ lọc "Đã xong".`))return;
-    st.sessions=st.sessions.filter(x=>x.id!==s.id); touch(); render();
+    st.sessions=st.sessions.filter(x=>x.id!==s.id);
+    act(`Xóa buổi ${s.date||"?"} · ${fmt(sTotal(s))}`); render();
   });
-  bindAvatars(root);
+  bindPics(root);
   if(editingId!==null) renderForm();
 }
 
@@ -956,7 +1059,7 @@ function renderForm(){
     const on=chosen.has(m.id), wt=on?chosen.get(m.id):1;
     return `<div class="pp">
       <div class="chk ${on?"on":""}" data-toggle="${esc(m.id)}">${on?"✓":""}</div>
-      <button class="avbtn ${avTarget===m.id?"arm":""}" data-av="${esc(m.id)}">${avatarHTML(m,28)}</button>
+      <button class="avbtn ${picOn("m",m.id)?"arm":""}" data-pic="m" data-picid="${esc(m.id)}">${avatarHTML(m,28)}</button>
       <div class="nm trunc">${esc(m.name)}${esc(dupTag(m))}${isPaid(draft,m.id)?` <span class="pill green">đã trả</span>`:""}</div>
       ${on?`<button class="wbtn ${wt==1?"on":""}" data-w="1" data-m="${esc(m.id)}">1</button>
             <button class="wbtn ${wt==0.5?"on":""}" data-w="0.5" data-m="${esc(m.id)}">½</button>
@@ -1004,7 +1107,7 @@ function renderForm(){
     const dup=st.members.filter(x=>x.name===nm).length;
     if(dup&&!confirm(`Đã có ${dup} người tên "${nm}".\nThêm người MỚI cùng tên? (phân biệt bằng ảnh)`))return;
     const m={id:id(),name:nm,av:""}; st.members.push(m); draft.parts.push({mid:m.id,weight:1});
-    touch(); renderForm();
+    act(`Thêm thành viên: ${nm}`); renderForm();
     const el=document.getElementById("f-newmem"); if(el){ el.value=""; el.focus(); }
   };
   document.getElementById("f-addmem").onclick=addMem;
@@ -1014,10 +1117,12 @@ function renderForm(){
     if(!draft.parts.length){ alert("Chọn ít nhất 1 người chơi."); return; }
     Object.keys(draft.paid).forEach(k=>{ if(!draft.parts.some(p=>p.mid===k)) delete draft.paid[k]; });
     const i=st.sessions.findIndex(s=>s.id===draft.id);
-    if(i>=0) st.sessions[i]=draft; else st.sessions.push(draft);
-    editingId=null; draft=null; sessFilter="open"; touch(); render();
+    const moi=i<0;
+    if(moi) st.sessions.push(draft); else st.sessions[i]=draft;
+    act(`${moi?"Thêm":"Sửa"} buổi ${draft.date||"?"} · ${fmt(sTotal(draft))} · ${draft.parts.length} người`);
+    editingId=null; draft=null; sessFilter="open"; render();
   };
-  bindAvatars(box);
+  bindPics(box);
 }
 function formTotals(){
   const t=document.getElementById("f-tot"); if(!t||!draft)return;
@@ -1051,7 +1156,7 @@ function adminMembers(root){
     }
     html+=`<div class="card ${clear?"done":""}">
       <div class="row" style="align-items:flex-start">
-        <button class="avbtn ${avTarget===m.id?"arm":""}" data-av="${esc(m.id)}">${avatarHTML(m,44)}</button>
+        <button class="avbtn ${picOn("m",m.id)?"arm":""}" data-pic="m" data-picid="${esc(m.id)}">${avatarHTML(m,44)}</button>
         <div style="flex:1;min-width:0"><div class="between">
           <div style="min-width:0"><div class="b trunc">${esc(m.name)}${esc(dupTag(m))}</div>
             <div class="tiny muted">${clear?`${r.n} buổi · đã trả đủ`:`nợ ${r.nDue}/${r.n} buổi · đã trả ${fmt(r.paid)}`}</div></div>
@@ -1074,7 +1179,8 @@ function adminMembers(root){
     const nm=val("m-new").trim(); if(!nm)return;
     const dup=st.members.filter(x=>x.name===nm).length;
     if(dup&&!confirm(`Đã có ${dup} người tên "${nm}".\nThêm người MỚI cùng tên?`))return;
-    st.members.push({id:id(),name:nm,av:""}); memFilter="all"; touch(); render();
+    st.members.push({id:id(),name:nm,av:""}); memFilter="all";
+    act(`Thêm thành viên: ${nm}`); render();
   };
   document.getElementById("m-add").onclick=add;
   document.getElementById("m-new").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } };
@@ -1083,22 +1189,26 @@ function adminMembers(root){
     openMember=openMember===b.dataset.open?null:b.dataset.open; render(); });
   root.querySelectorAll("[data-mp-s]").forEach(b=>b.onclick=()=>{
     const s=st.sessions.find(x=>x.id===b.dataset.mpS), mid=b.dataset.mpM; if(!s)return;
-    setPaid(s,mid,!isPaid(s,mid)); touch(); render(); });
+    const on=isPaid(s,mid); setPaid(s,mid,!on);
+    act(`${on?"Bỏ dấu đã trả":"Đánh dấu đã trả"}: ${memById(mid)?.name||"?"} · buổi ${s.date||"?"} · ${fmt(shareIn(s,mid))}`);
+    render(); });
   root.querySelectorAll("[data-payall-m]").forEach(b=>b.onclick=()=>{
     const mid=b.dataset.payallM, ses=memberDueSessions(mid), amt=memberDue(mid);
     if(!ses.length)return;
-    const undo=collect(ses.map(s=>({s,mid}))); render();
+    const undo=collect(ses.map(s=>({s,mid})),`Thu của ${memById(mid)?.name||"?"}: ${fmt(amt)} (${ses.length} buổi)`);
+    render();
     toast(`${memById(mid)?.name||"?"} đã trả ${fmt(amt)} (${ses.length} buổi)`,undo); });
   root.querySelectorAll("[data-note]").forEach(b=>b.onclick=()=>{
     const mid=b.dataset.note, cur=st.flags[mid]||"";
     const nw=prompt(`Ghi chú cho ${memById(mid)?.name||"?"} (để trống để xóa):`,cur); if(nw===null)return;
     if(nw.trim()) st.flags[mid]=nw.trim(); else delete st.flags[mid];
-    touch(); render(); });
+    act(`${nw.trim()?"Đặt":"Xóa"} ghi chú cho ${memById(mid)?.name||"?"}`); render(); });
   root.querySelectorAll("[data-rename]").forEach(b=>b.onclick=()=>{
     const m=memById(b.dataset.rename); if(!m)return;
     const nw=(prompt("Đổi tên:",m.name)||"").trim();
     if(!nw||nw===m.name)return;
-    m.name=nw; touch(); render(); });
+    const cu=m.name; m.name=nw;
+    act(`Đổi tên: "${cu}" → "${nw}"`); render(); });
   root.querySelectorAll("[data-delmem]").forEach(b=>b.onclick=()=>{
     const mid=b.dataset.delmem, m=memById(mid); if(!m)return;
     const used=memberSessions(mid).length, d=memberDue(mid);
@@ -1106,11 +1216,12 @@ function adminMembers(root){
     st.members=st.members.filter(x=>x.id!==mid);
     st.sessions.forEach(s=>{ s.parts=s.parts.filter(p=>p.mid!==mid); delete s.paid[mid]; });
     delete st.flags[mid]; sel.delete(mid);
+    act(`Xóa thành viên ${m.name}${used>0?` (khỏi ${used} buổi)`:""}`);
     if(openMember===mid) openMember=null;
-    if(avTarget===mid) avTarget=null;
+    if(picOn("m",mid)) picTarget=null;
     if(me===mid) me=null;
-    touch(); render(); });
-  bindAvatars(root);
+    render(); });
+  bindPics(root);
 }
 
 function adminCollect(root){
@@ -1151,6 +1262,25 @@ function adminCollect(root){
       </div>
       ${st.qr?`<div style="text-align:center"><img class="qrimg" src="${esc(st.qr)}" alt="QR"></div>`:""}
       <div class="tiny muted" style="margin-top:10px">Sổ đang ở phiên bản ${rev}. <button class="link" id="c-static" style="padding:0">Tải bản HTML tĩnh để backup</button></div>
+    </div>
+
+    <h2 class="sec">Lịch sử chỉnh sửa${(st.log||[]).length?` · ${st.log.length}`:""}</h2>
+    <div class="card">
+      ${(st.log||[]).length? st.log.slice().reverse().slice(0,logShow).map(e=>{
+          const d=new Date(e.t), ok=!isNaN(d);
+          return `<div class="srow" style="align-items:flex-start">
+            <div class="tiny muted num" style="width:86px;flex:0 0 auto;padding-top:1px">${
+              ok?esc(d.toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})):"—"}</div>
+            <div class="small" style="flex:1;min-width:0">${esc(e.m)}</div></div>`;
+        }).join("")
+        : `<div class="empty">Chưa ghi nhận thao tác nào. Từ giờ mọi thay đổi đều được ghi lại ở đây.</div>`}
+      <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap">
+        ${(st.log||[]).length>logShow?`<button class="ghost mini" id="c-more">Xem thêm ${Math.min(30,st.log.length-logShow)}</button>`:""}
+        ${logShow>15?`<button class="ghost mini" id="c-less">Thu gọn</button>`:""}
+        <div style="flex:1"></div>
+        ${(st.log||[]).length?`<button class="link del" id="c-logclear">Xóa lịch sử</button>`:""}
+      </div>
+      <div class="tiny muted" style="margin-top:8px">Giữ ${LOG_MAX} thao tác gần nhất. Nằm chung trong sổ nên không tốn thêm lần lưu nào.</div>
     </div>`;
 
   document.getElementById("c-all").onclick=()=>{ sel=new Set(owing.map(r=>r.m.id)); render(); };
@@ -1166,10 +1296,10 @@ function adminCollect(root){
     toast(`Đã ghi nhận ${fmt(grand)} từ ${names.length} người`,undo);
   };
   const noteEl=document.getElementById("c-note"); noteEl.value=st.note||"";
-  noteEl.oninput=()=>{ st.note=noteEl.value; touch(); };
+  noteEl.oninput=()=>{ st.note=noteEl.value; act("Sửa thông tin ngân hàng"); };
   document.getElementById("c-qr").onclick=()=>document.getElementById("qr-file").click();
   const qd=document.getElementById("c-qrdel");
-  if(qd) qd.onclick=()=>{ st.qr=""; touch(); render(); };
+  if(qd) qd.onclick=()=>{ st.qr=""; act("Xóa mã QR"); render(); };
   document.getElementById("c-import").onclick=()=>document.getElementById("json-file").click();
   document.getElementById("c-export").onclick=()=>{
     const b=new Blob([JSON.stringify(st,null,2)],{type:"application/json"});
@@ -1178,50 +1308,118 @@ function adminCollect(root){
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   };
   document.getElementById("c-static").onclick=exportStatic;
+  const more=document.getElementById("c-more");
+  if(more) more.onclick=()=>{ logShow+=30; render(); };
+  const less=document.getElementById("c-less");
+  if(less) less.onclick=()=>{ logShow=15; render(); };
+  const lc=document.getElementById("c-logclear");
+  if(lc) lc.onclick=()=>{
+    if(!confirm(`Xóa toàn bộ ${st.log.length} dòng lịch sử? Số liệu tiền nong không bị ảnh hưởng.`))return;
+    st.log=[]; logShow=15; act("Xóa lịch sử chỉnh sửa"); render();
+  };
 }
 
-/* ---- ảnh đại diện: bấm → Ctrl+V, hoặc kéo thả, hoặc chọn file ---- */
-function toAvatar(blob,cb){
+/* ---- Ảnh: bấm vào ô ảnh → Ctrl+V, hoặc kéo thả, hoặc chọn file ----
+   Dùng chung cho ảnh đại diện người (k:"m") và ảnh buổi chơi (k:"s"). ---- */
+function shrink(blob,opt,cb){
   const rd=new FileReader();
   rd.onload=ev=>{ const im=new Image();
     im.onload=()=>{
-      const side=Math.min(im.width,im.height);
-      const cv=document.createElement("canvas"); cv.width=cv.height=AV_SIZE;
-      cv.getContext("2d").drawImage(im,(im.width-side)/2,(im.height-side)/2,side,side,0,0,AV_SIZE,AV_SIZE);
-      try{ cb(cv.toDataURL("image/jpeg",0.8)); }catch(e){ cb(ev.target.result); }
+      let w,h,sx=0,sy=0,sw=im.width,sh=im.height;
+      if(opt.square){                        // avatar: cắt vuông ở giữa
+        const side=Math.min(im.width,im.height);
+        sx=(im.width-side)/2; sy=(im.height-side)/2; sw=sh=side;
+        w=h=opt.size;
+      } else {                               // ảnh buổi: giữ tỉ lệ, gói trong cạnh dài opt.size
+        const r=Math.min(1,opt.size/Math.max(im.width,im.height));
+        w=Math.max(1,Math.round(im.width*r)); h=Math.max(1,Math.round(im.height*r));
+      }
+      const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+      cv.getContext("2d").drawImage(im,sx,sy,sw,sh,0,0,w,h);
+      try{ cb(cv.toDataURL("image/jpeg",opt.q)); }catch(e){ cb(ev.target.result); }
     };
     im.onerror=()=>alert("Không đọc được ảnh này.");
     im.src=ev.target.result; };
   rd.readAsDataURL(blob);
 }
-function applyAvatar(mid,blob){
-  toAvatar(blob,d=>{ const m=memById(mid); if(!m)return;
-    m.av=d; touch(); render(); toast("Đã cập nhật ảnh cho "+m.name); });
+function applyPic(t,blob){
+  if(!t) return;
+  if(t.k==="m") shrink(blob,{square:true,size:AV_SIZE,q:0.8},d=>{
+    const m=memById(t.id); if(!m)return;
+    m.av=d; act(`Đổi ảnh đại diện: ${m.name}`); render(); toast("Đã cập nhật ảnh cho "+m.name);
+  });
+  else shrink(blob,{square:false,size:PHOTO_SIZE,q:0.72},d=>{
+    const s2=st.sessions.find(x=>x.id===t.id); if(!s2)return;
+    s2.photo=d; act(`Thêm ảnh cho buổi ${s2.date||"?"}`); render(); toast("Đã thêm ảnh buổi "+(s2.date||""));
+  });
 }
-function bindAvatars(root){
-  root.querySelectorAll("[data-av]").forEach(b=>{
-    b.onclick=()=>{ avTarget=avTarget===b.dataset.av?null:b.dataset.av; render();
-      if(avTarget) toast("Giờ nhấn Ctrl+V để dán ảnh cho "+(memById(avTarget)?.name||"")); };
+const picName=t=>!t?"":(t.k==="m"?(memById(t.id)?.name||"")
+  :("buổi "+(st.sessions.find(x=>x.id===t.id)?.date||"?")));
+const picOn=(k,id)=>picTarget&&picTarget.k===k&&picTarget.id===id;
+/* Ô ảnh của buổi chơi. Admin bấm để dán/đổi ảnh, người xem bấm để phóng to. */
+function sessionPhoto(s,px){
+  const z=px||46, box=`width:${z}px;height:${z}px;min-width:${z}px`;
+  if(isAdmin) return `<button class="picbtn ${picOn("s",s.id)?"arm":""}" data-pic="s" data-picid="${esc(s.id)}"
+      title="${s.photo?"Bấm rồi Ctrl+V để đổi ảnh buổi này":"Thêm ảnh buổi này cho dễ nhớ"}" style="${box}">${
+      s.photo?`<img src="${esc(s.photo)}" alt="" style="${box}">`
+             :`<span class="picph" style="${box}">+</span>`}</button>`;
+  if(!s.photo) return "";
+  return `<button class="picbtn" data-zoom="${esc(s.id)}" title="Xem ảnh" style="${box}"><img src="${esc(s.photo)}" alt="" style="${box}"></button>`;
+}
+/* Thanh này là cách DUY NHẤT đặt ảnh trên điện thoại — nơi không có Ctrl+V lẫn kéo thả. */
+function renderPicBar(){
+  const bar=document.getElementById("pic-bar");
+  if(!isAdmin||!picTarget){ bar.innerHTML=""; return; }
+  const co = picTarget.k==="m" ? !!memById(picTarget.id)?.av
+                               : !!st.sessions.find(x=>x.id===picTarget.id)?.photo;
+  bar.innerHTML=`<div class="picbar">
+    <span style="flex:1;min-width:0">Ảnh cho <b>${esc(picName(picTarget))}</b> — <kbd>Ctrl</kbd>+<kbd>V</kbd> để dán</span>
+    <button data-pb="file">Chọn ảnh</button>
+    ${co?`<button data-pb="del">Xóa ảnh</button>`:""}
+    <button data-pb="done">Xong</button></div>`;
+  bar.querySelector('[data-pb="file"]').onclick=()=>document.getElementById("av-file").click();
+  bar.querySelector('[data-pb="done"]').onclick=()=>{ picTarget=null; render(); };
+  const d=bar.querySelector('[data-pb="del"]');
+  if(d) d.onclick=()=>{
+    if(picTarget.k==="m"){ const m=memById(picTarget.id); if(m){ m.av=""; act(`Xóa ảnh đại diện: ${m.name}`); } }
+    else { const s2=st.sessions.find(x=>x.id===picTarget.id); if(s2){ s2.photo=""; act(`Xóa ảnh buổi ${s2.date||"?"}`); } }
+    render();
+  };
+}
+function bindPics(root){
+  root.querySelectorAll("[data-zoom]").forEach(b=>b.onclick=()=>{
+    const s2=st.sessions.find(x=>x.id===b.dataset.zoom);
+    if(s2&&s2.photo) overlay(`<div class="sheet"><div class="between" style="margin-bottom:10px">
+      <b>Buổi ${esc(s2.date||"?")}</b><button class="link" id="z-x">Đóng</button></div>
+      <img src="${esc(s2.photo)}" alt=""></div>`);
+    const x=document.getElementById("z-x"); if(x) x.onclick=()=>overlay("");
+  });
+  root.querySelectorAll("[data-pic]").forEach(b=>{
+    const t={k:b.dataset.pic,id:b.dataset.picid};
+    b.onclick=()=>{
+      picTarget=picOn(t.k,t.id)?null:t; render();
+      if(picTarget) toast("Giờ nhấn Ctrl+V để dán ảnh cho "+picName(picTarget));
+    };
     b.ondragover=e=>{ e.preventDefault(); b.classList.add("drop"); };
     b.ondragleave=()=>b.classList.remove("drop");
     b.ondrop=e=>{ e.preventDefault(); b.classList.remove("drop");
       const f=e.dataTransfer?.files?.[0];
-      if(f&&f.type.startsWith("image")) applyAvatar(b.dataset.av,f); };
+      if(f&&f.type.startsWith("image")) applyPic(t,f); };
   });
 }
 document.addEventListener("paste",e=>{
-  if(!isAdmin||!avTarget) return;
+  if(!isAdmin||!picTarget) return;
   for(const it of (e.clipboardData?.items||[])){
     if(it.type&&it.type.startsWith("image")){
       const f=it.getAsFile();
-      if(f){ e.preventDefault(); applyAvatar(avTarget,f); return; }
+      if(f){ e.preventDefault(); applyPic(picTarget,f); return; }
     }
   }
   toast("Clipboard không có ảnh — copy ảnh rồi thử lại.");
 });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&avTarget){ avTarget=null; render(); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&picTarget){ picTarget=null; render(); } });
 document.getElementById("av-file").onchange=e=>{
-  const f=e.target.files[0]; if(f&&avTarget) applyAvatar(avTarget,f); e.target.value=""; };
+  const f=e.target.files[0]; if(f&&picTarget) applyPic(picTarget,f); e.target.value=""; };
 document.getElementById("qr-file").onchange=e=>{
   const f=e.target.files[0]; if(!f)return;
   const rd=new FileReader();
@@ -1231,7 +1429,7 @@ document.getElementById("qr-file").onchange=e=>{
     const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
     cv.getContext("2d").drawImage(im,0,0,w,h);
     try{ st.qr=cv.toDataURL("image/jpeg",0.85); }catch(err){ st.qr=ev.target.result; }
-    touch(); render(); }; im.src=ev.target.result; };
+    act("Cập nhật mã QR"); render(); }; im.src=ev.target.result; };
   rd.readAsDataURL(f); e.target.value="";
 };
 document.getElementById("json-file").onchange=e=>{
@@ -1242,8 +1440,9 @@ document.getElementById("json-file").onchange=e=>{
     try{ next=migrate(JSON.parse(ev.target.result)); }
     catch(err){ alert("File không hợp lệ: "+err.message); return; }
     if(!confirm(`Nhập ${next.sessions.length} buổi / ${next.members.length} người?\nSổ trên web sẽ bị ghi đè.`))return;
-    st=next; sel.clear(); openMember=null; editingId=null; draft=null; avTarget=null;
-    touch(); render(); toast("Đã nhập — đang lưu lên web…");
+    st=next; sel.clear(); openMember=null; editingId=null; draft=null; picTarget=null;
+    act(`Nhập dữ liệu từ file JSON: ${st.sessions.length} buổi / ${st.members.length} người`);
+    render(); toast("Đã nhập — đang lưu lên web…");
   };
   rd.onloadend=()=>{ e.target.value=""; };
   rd.readAsText(f);

@@ -5,7 +5,11 @@ Một trang cho cả nhóm xem tiền, một mật khẩu cho mình sửa.
 - **Người xem** (không cần gì cả): tìm tên mình → thấy nợ bao nhiêu, gồm những buổi nào,
   nội dung chuyển khoản, QR. Xem được cả nhóm và cách chia từng buổi. Tải được ảnh để lưu.
 - **Chủ sổ** (bấm *Quản trị* ở cuối trang, nhập mật khẩu): thêm buổi, tick ai đã trả,
-  quản lý thành viên + ảnh đại diện. Sửa xong **tự lưu**, cả nhóm refresh là thấy.
+  quản lý thành viên + ảnh đại diện, gắn ảnh cho từng buổi chơi. Sửa xong **tự lưu**,
+  cả nhóm refresh là thấy. Mọi thao tác được ghi vào **Lịch sử chỉnh sửa** (tab Thu tiền).
+
+Ảnh (đại diện và ảnh buổi): bấm vào ô ảnh rồi **Ctrl+V**, hoặc kéo thả, hoặc bấm
+**Chọn ảnh** ở thanh hiện ra — cách này dùng được trên điện thoại.
 
 ```
 index.html        toàn bộ giao diện (xem + quản trị) — một file, không cần build
