@@ -1,0 +1,10 @@
+{
+  "branches": ["sport_bui_thi_xuan_badminton"],
+  "days_ahead": 15,
+  "weekdays_only": true,
+  "interval_min": 30,
+  "delay_sec": 2.5,
+  "fetch_schedule_month": true,
+  "fetch_lock_yards": true,
+  "fetch_cores_once": true
+}

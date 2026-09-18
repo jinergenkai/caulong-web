@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALOBO · Sân trống</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1a1d24; --ink2:#5b6472; --muted:#8b93a1;
+    --line:#e6e9ee; --line2:#eef1f5; --accent:#2563eb;
+    --free:#17a35a; --free-bg:#e7f7ee; --free-ring:#0f8a49;
+    --booked:#dd6a58; --booked-bg:#fbe9e5;
+    --locked:#aab2bf; --locked-bg:#eef1f5;
+    --event:#9a6de0; --event-bg:#f0e9fb;
+    --g0:#eceef1; --g1:#cdeed9; --g2:#9fe0bb; --g3:#66cd93; --g4:#2fb673; --g5:#12904f;
+    --shadow:0 1px 2px rgba(17,24,39,.05),0 4px 16px rgba(17,24,39,.05);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0f1216; --panel:#161a20; --ink:#e8ebef; --ink2:#a6afbd; --muted:#727c8a;
+    --line:#252b33; --line2:#1e232a; --accent:#5b8bf0;
+    --free:#3ad081; --free-bg:#12281d; --free-ring:#48e08f;
+    --booked:#e07b6a; --booked-bg:#2b1a16;
+    --locked:#5c6672; --locked-bg:#1c2128;
+    --event:#a985e6; --event-bg:#211a30;
+    --g0:#1c2128; --g1:#173325; --g2:#1c5238; --g3:#22794f; --g4:#2fa268; --g5:#4fd28c;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 16px 64px;}
+  header.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;margin-bottom:4px;}
+  h1{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em;}
+  .sub{color:var(--ink2);font-size:13px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:16px;margin-top:16px;}
+  .controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;}
+  .seg{display:inline-flex;background:var(--line2);border-radius:10px;padding:3px;gap:2px;}
+  .seg button{border:0;background:transparent;color:var(--ink2);font:inherit;font-weight:600;
+    padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;}
+  .seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .toggle{display:inline-flex;align-items:center;gap:7px;color:var(--ink2);cursor:pointer;user-select:none;}
+  .toggle input{accent-color:var(--accent);width:15px;height:15px;}
+  select{font:inherit;padding:6px 10px;border-radius:9px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;color:var(--ink2);font-size:12.5px;margin-top:2px;}
+  .lg{display:inline-flex;align-items:center;gap:6px;}
+  .sw{width:15px;height:15px;border-radius:4px;border:1px solid rgba(0,0,0,.08);display:inline-block;}
+  .hatch{background-image:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,.18) 3px,rgba(0,0,0,.18) 4px);}
+
+  /* heatmap chung */
+  .scroll{overflow-x:auto;}
+  table.hm{border-collapse:separate;border-spacing:3px;}
+  table.hm th{font-weight:600;color:var(--ink2);font-size:11.5px;text-align:center;
+    padding:2px 4px;white-space:nowrap;position:sticky;}
+  table.hm th.row{text-align:right;padding-right:8px;min-width:74px;position:sticky;left:0;background:var(--panel);z-index:2;}
+  table.hm th.col{top:0;background:var(--panel);}
+  td.cell{width:30px;height:26px;border-radius:5px;position:relative;cursor:default;}
+  td.cell.free{background:var(--free-bg);box-shadow:inset 0 0 0 1.5px var(--free-ring);}
+  td.cell.free::after{content:"";position:absolute;inset:0;margin:auto;width:7px;height:7px;
+    border-radius:50%;background:var(--free);}
+  td.cell.booked{background:var(--booked-bg);}
+  td.cell.booked::after{content:"";position:absolute;inset:6px;border-radius:3px;background:var(--booked);opacity:.55;}
+  td.cell.locked{background:var(--locked-bg);}
+  td.cell.event{background:var(--event-bg);}
+  td.cell.event::after{content:"★";position:absolute;inset:0;display:flex;align-items:center;
+    justify-content:center;color:var(--event);font-size:12px;}
+  td.cell.dim{opacity:.34;}
+  td.cell.hl-free{box-shadow:inset 0 0 0 2px var(--free);}
+  /* overview */
+  td.ov{width:52px;height:34px;border-radius:6px;text-align:center;font-weight:700;font-size:13px;color:var(--ink);}
+  td.ov small{display:block;font-weight:500;font-size:9.5px;color:var(--ink2);}
+
+  .hint{color:var(--muted);font-size:12.5px;margin-top:10px;}
+  .free-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .chip{background:var(--free-bg);color:var(--free);border:1px solid var(--free-ring);
+    border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:600;}
+  .chip.none{background:var(--line2);color:var(--muted);border-color:var(--line);font-weight:500;}
+  .tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;
+    padding:6px 9px;border-radius:8px;opacity:0;transform:translateY(-4px);transition:opacity .1s;
+    z-index:50;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.25);}
+  .weekday-w{color:var(--muted);}
+  .kpis{display:flex;flex-wrap:wrap;gap:12px;margin-top:2px;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:120px;}
+  .kpi b{font-size:22px;font-weight:750;letter-spacing:-.02em;display:block;}
+  .kpi span{color:var(--ink2);font-size:12px;}
+  .kpi.good b{color:var(--free);}
+  @media (max-width:520px){ td.ov{width:42px} th.row{min-width:58px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 id="title">Sân trống</h1>
+    <span class="sub" id="subtitle"></span>
+  </header>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card">
+    <div class="controls">
+      <span id="branchPick" style="display:none">
+        <select id="branchSel"></select>
+      </span>
+      <div class="seg" id="viewSeg">
+        <button data-v="overview" class="on">Tổng quan</button>
+        <button data-v="detail">Chi tiết sân</button>
+      </div>
+      <label class="toggle"><input type="checkbox" id="focusChk" checked> Chỉ 18:00–22:00</label>
+      <label class="toggle"><input type="checkbox" id="wdChk" checked> Chỉ T2–T6</label>
+      <span id="courtPick" style="display:none">
+        Sân: <select id="courtSel"></select>
+      </span>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="card">
+    <div id="board" class="scroll"></div>
+    <div id="freePanel"></div>
+    <div class="hint" id="hint"></div>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const WD_FULL = {T2:"Thứ 2",T3:"Thứ 3",T4:"Thứ 4",T5:"Thứ 5",T6:"Thứ 6",T7:"Thứ 7",CN:"Chủ nhật"};
+let DATA=null, G=null, state={view:"overview", court:null, focus:true, wd:true};
+const tip = document.getElementById('tip');
+
+function fmtDate(iso){const [y,m,d]=iso.split('-');return `${d}/${m}`;}
+function slotsInView(){ return G.slots.filter(s => !state.focus || (s>="18:00" && s<"22:00")); }
+function daysInView(){
+  const f=G.days.filter(d => !(state.wd && d.is_weekend));
+  return f.length ? f : G.days;   // rong (chi cuoi tuan) -> tam hien tat ca
+}
+function weekendOnly(){ return state.wd && !G.days.some(d=>!d.is_weekend); }
+function occSet(){ if(!G.__occ){G.__occ=new Set(G.occupied.map(c=>c.court+"|"+c.date+"|"+c.slot))
+    ;G.__stat={};G.occupied.forEach(c=>G.__stat[c.court+"|"+c.date+"|"+c.slot]=c.status);} return G.__occ; }
+function statusAt(court,date,slot){
+  occSet(); const k=court+"|"+date+"|"+slot;
+  if(G.__occ.has(k)) return G.__stat[k]||"booked";
+  return "free";
+}
+
+function showTip(e,html){ tip.innerHTML=html; tip.style.opacity=1;
+  const x=Math.min(e.clientX+12, innerWidth-tip.offsetWidth-8);
+  tip.style.left=x+"px"; tip.style.top=(e.clientY-tip.offsetHeight-8)+"px"; }
+function hideTip(){ tip.style.opacity=0; }
+
+/* ---------- Tổng quan: sân × ngày, số ô trống buổi (focus) ---------- */
+function renderOverview(){
+  const slots=slotsInView(), days=daysInView();
+  const max=slots.length;
+  const ramp=(n)=>{ if(n<=0)return"var(--g0)"; const q=n/max;
+    return q<=.2?"var(--g1)":q<=.4?"var(--g2)":q<=.7?"var(--g3)":q<.999?"var(--g4)":"var(--g5)";};
+  let h='<table class="hm"><thead><tr><th class="row"></th>';
+  days.forEach(d=>{h+=`<th class="col ${d.is_weekend?'weekday-w':''}">${d.weekday}<br><span class="sub">${fmtDate(d.date)}</span></th>`;});
+  h+='</tr></thead><tbody>';
+  G.courts.forEach(ct=>{
+    h+=`<tr><th class="row">${ct}</th>`;
+    days.forEach(d=>{
+      let free=0; slots.forEach(s=>{ if(statusAt(ct,d.date,s)==="free") free++; });
+      const full = free===0;
+      h+=`<td class="ov" data-ct="${ct}" data-date="${d.date}" data-free="${free}" data-tot="${slots.length}"
+            style="background:${ramp(free)};${full?'color:var(--muted)':''}">${free}<small>/${slots.length}</small></td>`;
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  const b=document.getElementById('board'); b.innerHTML=h;
+  b.querySelectorAll('td.ov').forEach(td=>{
+    td.onmousemove=e=>{ const f=+td.dataset.free, t=+td.dataset.tot;
+      const dObj=G.days.find(x=>x.date===td.dataset.date);
+      showTip(e,`<b>${td.dataset.ct}</b> · ${WD_FULL[dObj.weekday]} ${fmtDate(td.dataset.date)}<br>
+        ${f} / ${t} ô trống ${state.focus?'(18–22h)':''}`); };
+    td.onmouseleave=hideTip;
+    td.onclick=()=>{ state.view="detail"; state.court=td.dataset.ct; syncControls(); render(); };
+  });
+  document.getElementById('freePanel').innerHTML='';
+  document.getElementById('hint').textContent="Số = ô trống mỗi sân theo ngày. Bấm một ô để xem chi tiết sân đó. Ô càng xanh càng nhiều chỗ trống.";
+}
+
+/* ---------- Chi tiết: 1 sân, ngày × giờ ---------- */
+function renderDetail(){
+  const ct=state.court||G.courts[0]; state.court=ct;
+  const slots=slotsInView(), days=daysInView();
+  let h='<table class="hm"><thead><tr><th class="row"></th>';
+  slots.forEach(s=>{h+=`<th class="col">${s}</th>`;});
+  h+='</tr></thead><tbody>';
+  days.forEach(d=>{
+    h+=`<tr><th class="row ${d.is_weekend?'weekday-w':''}">${d.weekday} <span class="sub">${fmtDate(d.date)}</span></th>`;
+    slots.forEach(s=>{
+      const st=statusAt(ct,d.date,s);
+      h+=`<td class="cell ${st}" data-date="${d.date}" data-slot="${s}" data-st="${st}"></td>`;
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  const b=document.getElementById('board'); b.innerHTML=h;
+  const label={free:"Trống",booked:"Đã đặt",locked:"Khoá",event:"Sự kiện"};
+  b.querySelectorAll('td.cell').forEach(td=>{
+    td.onmousemove=e=>{ const dObj=G.days.find(x=>x.date===td.dataset.date);
+      showTip(e,`<b>${ct}</b> · ${WD_FULL[dObj.weekday]} ${fmtDate(td.dataset.date)}<br>
+        ${td.dataset.slot} — <b style="color:${td.dataset.st==='free'?'var(--free)':'inherit'}">${label[td.dataset.st]}</b>`); };
+    td.onmouseleave=hideTip;
+  });
+  // panel: liet ke o trong theo ngay
+  let fp=`<div class="hint" style="margin-top:14px"><b>Ô trống của ${ct}</b></div>`;
+  days.forEach(d=>{
+    const free=slots.filter(s=>statusAt(ct,d.date,s)==="free");
+    fp+=`<div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+      <span class="sub" style="min-width:96px">${d.weekday} ${fmtDate(d.date)}</span>`;
+    if(free.length) fp+='<div class="free-list">'+free.map(s=>`<span class="chip">${s}</span>`).join('')+'</div>';
+    else fp+='<span class="chip none">kín</span>';
+    fp+='</div>';
+  });
+  document.getElementById('freePanel').innerHTML=fp;
+  document.getElementById('hint').textContent="";
+}
+
+function renderLegend(){
+  const items = state.view==="detail"
+    ? [["free","Trống"],["booked","Đã đặt"],["locked","Khoá"],["event","Sự kiện"]]
+    : [["g1","ít chỗ"],["g3","vừa"],["g5","nhiều chỗ trống"],["g0","kín"]];
+  const swClass={locked:"hatch"};
+  document.getElementById('legend').innerHTML = items.map(([k,l])=>{
+    const isStat=["free","booked","locked","event"].includes(k);
+    const bg=isStat?`var(--${k}-bg)`:`var(--${k})`;
+    const ring=k==="free"?"box-shadow:inset 0 0 0 1.5px var(--free-ring)":"";
+    const dot=k==="free"?'<i style="position:absolute;inset:0;margin:auto;width:6px;height:6px;border-radius:50%;background:var(--free)"></i>':'';
+    return `<span class="lg"><span class="sw ${swClass[k]||''}" style="background:${bg};position:relative;${ring}">${dot}</span>${l}</span>`;
+  }).join('');
+}
+
+function renderKpis(){
+  const slots=G.slots.filter(s=>s>="18:00"&&s<"22:00");
+  const days=G.days.filter(d=>!d.is_weekend);
+  let free=0,total=0;
+  G.courts.forEach(ct=>days.forEach(d=>slots.forEach(s=>{total++; if(statusAt(ct,d.date,s)==="free")free++;})));
+  const daysWithFree=days.filter(d=>G.courts.some(ct=>slots.some(s=>statusAt(ct,d.date,s)==="free"))).length;
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi good"><b>${free}</b><span>ô trống 18–22h (T2–T6)</span></div>
+    <div class="kpi"><b>${daysWithFree}/${days.length}</b><span>ngày T2–T6 có chỗ</span></div>
+    <div class="kpi"><b>${G.courts.length}</b><span>sân</span></div>
+    <div class="kpi"><b>${G.days.length}</b><span>ngày theo dõi</span></div>`;
+}
+
+function syncControls(){
+  document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
+  document.getElementById('courtPick').style.display = state.view==="detail"?"":"none";
+  document.getElementById('focusChk').checked=state.focus;
+  document.getElementById('wdChk').checked=state.wd;
+  const sel=document.getElementById('courtSel');
+  if(sel.options.length!==G.courts.length){ sel.innerHTML=G.courts.map(c=>`<option>${c}</option>`).join(''); }
+  if(state.court) sel.value=state.court;
+}
+
+function render(){
+  renderLegend();
+  if(state.view==="overview") renderOverview(); else renderDetail();
+  const noteEl=document.getElementById('hint');
+  if(weekendOnly()){
+    noteEl.innerHTML='⚠️ Dữ liệu hiện chỉ có ngày cuối tuần — đang tạm hiển thị tất cả. '
+      +'Bỏ tick “Chỉ T2–T6” hoặc thêm file ngày trong tuần.';
+  }
+}
+
+function selectBranch(i){
+  G=DATA.branches[i]; delete G.__occ;
+  document.getElementById('title').textContent=G.branch_name;
+  document.getElementById('subtitle').textContent=
+    `${G.days.length} ngày · ${G.courts.length} sân · cập nhật ${(new Date()).toLocaleString('vi-VN')}`;
+  state.court=G.courts[0];
+  renderKpis(); syncControls(); render();
+}
+
+function boot(payload){
+  // real (khong phai demo) len truoc
+  payload.branches.sort((a,b)=>(a.branch==="demo")-(b.branch==="demo"));
+  DATA=payload;
+  if(!payload.branches||!payload.branches.length){
+    document.getElementById('board').innerHTML='<p class="hint">Chưa có dữ liệu. Đặt file get_onetime_bookings đã giải mã vào thư mục <code>data/</code> rồi tải lại.</p>';
+    document.getElementById('kpis').innerHTML='';
+    return;
+  }
+  const bp=document.getElementById('branchPick'), bs=document.getElementById('branchSel');
+  if(payload.branches.length>1){
+    bp.style.display=''; bs.innerHTML=payload.branches.map((g,i)=>`<option value="${i}">${g.branch_name}</option>`).join('');
+    bs.onchange=e=>selectBranch(+e.target.value);
+  }
+  selectBranch(0);
+}
+
+// events
+document.getElementById('viewSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
+  state.view=b.dataset.v; syncControls(); render(); };
+document.getElementById('focusChk').onchange=e=>{state.focus=e.target.checked; render();};
+document.getElementById('wdChk').onchange=e=>{state.wd=e.target.checked; render();};
+document.getElementById('courtSel').onchange=e=>{state.court=e.target.value; render();};
+
+fetch('/api/data').then(r=>r.json()).then(boot).catch(err=>{
+  document.getElementById('board').innerHTML='<p class="hint">Không tải được dữ liệu: '+err+'</p>';
+});
+</script>
+</body>
+</html>

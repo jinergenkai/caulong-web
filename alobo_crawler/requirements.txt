@@ -1,0 +1,9 @@
+# Bat buoc cho moi script
+pycryptodome>=3.20
+
+# Cho capture qua trinh duyet that (alobo_capture.py)
+playwright>=1.44
+#   sau khi pip install:  python -m playwright install chromium
+
+# Chi dung boi test.py (probe 403 cu) - khong bat buoc
+httpx>=0.27

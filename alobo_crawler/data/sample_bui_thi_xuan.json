@@ -1,0 +1,5600 @@
+{
+ "branch": "demo",
+ "branch_name": "Demo — dữ liệu mẫu (nhiều ngày)",
+ "generated_at": "2026-09-18T19:00:00",
+ "slot_minutes": 30,
+ "hours": {
+  "start": "06:00",
+  "end": "22:00"
+ },
+ "focus": {
+  "start": "18:00",
+  "end": "22:00",
+  "weekdays_only": true
+ },
+ "courts": [
+  "Sân 1",
+  "Sân 2",
+  "Sân 3",
+  "Sân 4",
+  "Sân 5",
+  "Sân 6",
+  "Sân 7"
+ ],
+ "days": [
+  {
+   "date": "2026-09-21",
+   "weekday": "T2"
+  },
+  {
+   "date": "2026-09-22",
+   "weekday": "T3"
+  },
+  {
+   "date": "2026-09-23",
+   "weekday": "T4"
+  },
+  {
+   "date": "2026-09-24",
+   "weekday": "T5"
+  },
+  {
+   "date": "2026-09-25",
+   "weekday": "T6"
+  },
+  {
+   "date": "2026-09-28",
+   "weekday": "T2"
+  },
+  {
+   "date": "2026-09-29",
+   "weekday": "T3"
+  },
+  {
+   "date": "2026-09-30",
+   "weekday": "T4"
+  },
+  {
+   "date": "2026-10-01",
+   "weekday": "T5"
+  },
+  {
+   "date": "2026-10-02",
+   "weekday": "T6"
+  }
+ ],
+ "occupied": [
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-21",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-22",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-23",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-24",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-25",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-28",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "19:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-29",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-09-30",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-01",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 1",
+   "date": "2026-10-02",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "18:30",
+   "status": "event"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-21",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-22",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-23",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-24",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "19:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-25",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "21:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-28",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-29",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-09-30",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-01",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 2",
+   "date": "2026-10-02",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-21",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-22",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-23",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-24",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-25",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "20:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-28",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-29",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-09-30",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-01",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "18:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "20:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 3",
+   "date": "2026-10-02",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-21",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-22",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-23",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-24",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "19:30",
+   "status": "event"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-25",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "19:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-28",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-29",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-09-30",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-01",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 4",
+   "date": "2026-10-02",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-21",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-22",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-23",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-24",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-25",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-28",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-29",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-09-30",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-01",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 5",
+   "date": "2026-10-02",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-21",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-22",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-23",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "20:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-24",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-25",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-28",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-29",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-09-30",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-01",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 6",
+   "date": "2026-10-02",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "12:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-21",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-22",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-23",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-24",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "18:30",
+   "status": "event"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-25",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "15:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "21:00",
+   "status": "event"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-28",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "10:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "11:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "18:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-29",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "08:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "09:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "11:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "15:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "16:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "17:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-09-30",
+   "slot": "21:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "06:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "08:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "10:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "14:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "18:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "20:30",
+   "status": "event"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-01",
+   "slot": "21:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "06:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "07:00",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "07:30",
+   "status": "locked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "09:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "12:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "13:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "13:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "14:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "16:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "17:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "19:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "19:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "20:00",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "20:30",
+   "status": "booked"
+  },
+  {
+   "court": "Sân 7",
+   "date": "2026-10-02",
+   "slot": "21:00",
+   "status": "booked"
+  }
+ ]
+}

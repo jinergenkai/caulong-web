@@ -1,0 +1,18 @@
+# du lieu that (co the chua PII) - KHONG commit; chi giu file mau
+data/*.json
+!data/sample_*.json
+
+# secrets
+.env
+
+# runtime / tam
+captures/
+profile/
+*.png
+*.sqlite
+main.dart.js
+envelope.json
+_*.js
+_*.json
+__pycache__/
+.venv/
