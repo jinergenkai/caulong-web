@@ -16,3 +16,4 @@ _*.js
 _*.json
 __pycache__/
 .venv/
+data/_crawl.log

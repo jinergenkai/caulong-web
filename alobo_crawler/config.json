@@ -1,10 +1,23 @@
 {
-  "branches": ["sport_bui_thi_xuan_badminton"],
+  "branches": [
+    "sport_san_cau_long_nha_tap_luyen_phu_tho",
+    "sport_nu_cuoi_badminton",
+    "sport_hoang_van_thu_badminton",
+    "sport_pooc_pickleball_badminton",
+    "sport_san_cau_long_k3",
+    "sport_bui_thi_xuan_badminton",
+    "sport_san_cau_long_tan_binh",
+    "sport_sky_phu_nhuan",
+    "sport_loca_badminton"
+  ],
   "days_ahead": 15,
-  "weekdays_only": true,
+  "weekdays_only": false,
   "interval_min": 30,
   "delay_sec": 2.5,
   "fetch_schedule_month": true,
   "fetch_lock_yards": true,
-  "fetch_cores_once": true
+  "fetch_cores_once": true,
+  "fetch_branch": true,
+  "fetch_core_types": true,
+  "fetch_products": false
 }

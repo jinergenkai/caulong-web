@@ -14,10 +14,15 @@ sample_*.json co san de xem thu ngay.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import glob
 import json
 import os
 import posixpath
+import re
+import subprocess
+import sys
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import adapt
@@ -32,10 +37,49 @@ def branch_meta(doc, fallback_name):
     return fallback_name, fallback_name
 
 
+_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def _dir_names() -> dict:
+    try:
+        d = json.load(open(DIRECTORY_PATH, encoding="utf-8"))
+        return {b["id"]: b.get("name", b["id"]) for b in d.get("branches", []) if b.get("id")}
+    except Exception:
+        return {}
+
+
+def _classify(name: str):
+    """(branch_key, kind) tu ten file. kind: onetime|schedule|locks|cores."""
+    stem = name.replace(".json", "")
+    branch = stem.split("__")[0] if "__" in stem else "sport_bui_thi_xuan_badminton"
+    suffix = stem.split("__", 1)[1] if "__" in stem else stem
+    if suffix == "cores":
+        return branch, "cores"
+    if suffix == "core_types":
+        return branch, "core_types"
+    if suffix == "branch":
+        return branch, "branch"
+    if suffix == "locks":
+        return branch, "locks"
+    if suffix == "products":
+        return branch, "products"
+    if suffix.startswith("schedule"):
+        return branch, "schedule"
+    return branch, "onetime"  # ngay-cu-the hoac file don
+
+
 def load_data(data_dir: str) -> dict:
-    """Doc + adapt moi file -> gom theo branch -> list grid."""
+    """Doc + adapt moi file -> gom theo branch (booked+locked+cores) -> list grid."""
     files = sorted(glob.glob(os.path.join(data_dir, "*.json")))
+    names = _dir_names()
     branches: dict[str, dict] = {}
+
+    def slot_for(key, pretty=None):
+        return branches.setdefault(key, {"branch": key, "branch_name": pretty or names.get(key, key),
+                                         "booked": [], "booking_lists": [], "lock_docs": [],
+                                         "cores": None, "core_types": None, "branch_doc": None,
+                                         "products": None, "days_hint": None, "dates": set()})
+
     for path in files:
         name = os.path.basename(path)
         if name.startswith("_") or name.startswith("."):
@@ -45,42 +89,236 @@ def load_data(data_dir: str) -> dict:
         except Exception as e:
             print(f"  [bo qua] {name}: {e}")
             continue
-        occ = adapt.adapt_doc(doc)
-        if not occ:
-            continue
-        if isinstance(doc, dict):
-            # file da chuan hoa (vd sample): mang branch/ten rieng
+
+        # file da chuan hoa (sample) -> branch rieng, coi nhu 'booked' (co san status)
+        if isinstance(doc, dict) and ("occupied" in doc or "cells" in doc):
             key = doc.get("branch", name.replace(".json", ""))
-            pretty = doc.get("branch_name", key)
-            days_hint = [d["date"] for d in doc["days"]] if doc.get("days") else None
-        else:
-            # file raw get_onetime_bookings: suy branch tu TEN FILE.
-            #   <branchId>__<gi-cung-duoc>.json  -> gom theo <branchId>
-            #   get_onetime_bookings.json / khac  -> branch mac dinh
-            stem = name.replace(".json", "")
-            if "__" in stem:
-                key = stem.split("__")[0]
-                pretty = key
-            else:
-                key = "sport_bui_thi_xuan_badminton"
-                pretty = "Sân Cầu Lông Bùi Thị Xuân"
-            days_hint = None  # ngay suy tu chinh du lieu (union)
-        slot = branches.setdefault(key, {"branch": key, "branch_name": pretty,
-                                         "occupied": [], "days_hint": days_hint})
-        slot["occupied"].extend(occ)
-        if days_hint:
-            slot["days_hint"] = days_hint
+            s = slot_for(key, doc.get("branch_name", key))
+            s["booked"].extend(adapt.adapt_doc(doc))
+            if doc.get("days"):
+                s["days_hint"] = [d["date"] for d in doc["days"]]
+            continue
+
+        key, kind = _classify(name)
+        s = slot_for(key)
+        if kind == "cores":
+            s["cores"] = doc
+        elif kind == "core_types":
+            s["core_types"] = doc
+        elif kind == "branch":
+            s["branch_doc"] = doc
+        elif kind == "products":
+            s["products"] = doc
+        elif kind == "locks":
+            s["lock_docs"].append(doc)           # đặt tên sân sau khi có cores
+        else:  # onetime | schedule -> booked
+            body = doc.get("data") if isinstance(doc, dict) and isinstance(doc.get("data"), list) else doc
+            if isinstance(body, list):
+                s["booking_lists"].append(body)  # đặt tên sân sau khi có cores
+            if kind == "onetime":
+                m = _DATE_RE.search(name)
+                if m:
+                    s["dates"].add(m.group(0))   # ngay da CAO (du rong hay ban)
 
     out = []
     for key, s in branches.items():
-        # khu trung lap
-        uniq = {(c["court"], c["date"], c["slot"]): c for c in s["occupied"]}
-        occ = list(uniq.values())
-        grid = adapt.build_grid(occ, branch=key, branch_name=s["branch_name"],
-                                days=s["days_hint"])
+        cores = adapt.courts_from_cores(s["cores"]) if s["cores"] else []
+        court_order = [c["name"] for c in cores]
+        cmap = adapt.court_name_map(s["cores"]) if s["cores"] else {}
+        # giờ mới đặt tên sân (đã có cores) cho booking + lock
+        booked = list(s["booked"])
+        for body in s["booking_lists"]:
+            booked += adapt.occupied_from_onetime(body, court_map=cmap)
+        locked = []
+        for d in s["lock_docs"]:
+            locked += adapt.locked_from_lockyards(d, court_map=cmap)
+        occ = adapt.merge_status(booked, locked)
+        # ngay hien thi: uu tien ngay DA CAO (onetime), else days_hint, else union
+        if s["dates"]:
+            days = sorted(s["dates"])
+            keep = set(days)
+            occ = [c for c in occ if c["date"] in keep]   # bo cell ngoai cua so
+        else:
+            days = s["days_hint"]
+        name = adapt.name_from_branch(s["branch_doc"]) or s["branch_name"]
+        grid = adapt.build_grid(occ, branch=key, branch_name=name,
+                                days=days, courts_override=court_order or None)
+        grid["prices"] = adapt.prices_from_core_types(s["core_types"], s["cores"]) if s["core_types"] else {}
+        grid["court_sport"] = adapt.court_sport_map(s["cores"]) if s["cores"] else {}
         out.append(grid)
     out.sort(key=lambda g: g["branch_name"])
     return {"branches": out, "count": len(out)}
+
+
+CONFIG_PATH = os.path.join(HERE, "config.json")
+DIRECTORY_PATH = os.path.join(HERE, "branches_directory.json")
+BRANCH_RE = re.compile(r"^[a-z0-9_\-]{2,80}$")
+
+
+def read_config() -> dict:
+    try:
+        import scheduler
+        return scheduler.load_config()
+    except Exception:
+        cfg = {"branches": [], "days_ahead": 15}
+        if os.path.exists(CONFIG_PATH):
+            try:
+                cfg.update(json.load(open(CONFIG_PATH, encoding="utf-8")))
+            except Exception:
+                pass
+        return cfg
+
+
+def write_config_branches(branches: list) -> dict:
+    """Ghi lai config.json voi danh sach branches moi (giu cac khoa khac)."""
+    branches = [b.strip() for b in branches if isinstance(b, str) and BRANCH_RE.match(b.strip())]
+    branches = list(dict.fromkeys(branches))  # khu trung lap, giu thu tu
+    cfg = {}
+    if os.path.exists(CONFIG_PATH):
+        cfg = json.load(open(CONFIG_PATH, encoding="utf-8"))
+    cfg["branches"] = branches
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, ensure_ascii=False, indent=2)
+    return cfg
+
+
+def read_directory() -> dict:
+    """Danh ba san: file bundled + branch dang theo doi + branch co du lieu."""
+    entries = {}
+    if os.path.exists(DIRECTORY_PATH):
+        try:
+            for b in json.load(open(DIRECTORY_PATH, encoding="utf-8")).get("branches", []):
+                if b.get("id"):
+                    entries[b["id"]] = {"id": b["id"], "name": b.get("name", b["id"]),
+                                        "sport": b.get("sport", "")}
+        except Exception:
+            pass
+    cfg = read_config()
+    monitored = set(cfg.get("branches", []))
+    # branch co du lieu tren dia
+    payload = load_data(os.path.join(HERE, "data"))
+    with_data = {g["branch"] for g in payload["branches"]}
+    names = {g["branch"]: g["branch_name"] for g in payload["branches"]}
+    for bid in monitored | with_data:
+        if bid == "demo":
+            continue
+        e = entries.setdefault(bid, {"id": bid, "name": names.get(bid, bid), "sport": ""})
+        if bid in names and (e["name"] == bid):
+            e["name"] = names[bid]
+    out = []
+    for bid, e in entries.items():
+        out.append({**e, "monitored": bid in monitored, "has_data": bid in with_data})
+    out.sort(key=lambda x: (not x["monitored"], x["name"].lower()))
+    return {"branches": out, "monitored": sorted(monitored)}
+
+
+# ---------------------------------------------------------------- crawl control
+LOG_PATH = os.path.join(HERE, "data", "_crawl.log")
+_crawl = {"proc": None, "started": None, "finished": None, "returncode": None, "lock": threading.Lock()}
+_auto = {"enabled": False, "interval_min": 30, "next_run": None}
+WD_VN = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
+
+
+def _fmt_age(ts: float) -> str:
+    if not ts:
+        return "—"
+    s = max(0, int(dt.datetime.now().timestamp() - ts))
+    if s < 60:
+        return f"{s}s trước"
+    if s < 3600:
+        return f"{s // 60} phút trước"
+    if s < 86400:
+        return f"{s // 3600} giờ trước"
+    return f"{s // 86400} ngày trước"
+
+
+def crawl_coverage() -> dict:
+    """Với mỗi branch × ngày T2–T6 tới: có file chưa + cào lúc nào (mtime)."""
+    cfg = read_config()
+    today = dt.date.today()
+    dates = []
+    for i in range(1, cfg.get("days_ahead", 15) + 1):
+        d = today + dt.timedelta(days=i)
+        if cfg.get("weekdays_only", True) and d.weekday() >= 5:
+            continue
+        dates.append(d)
+    branches = []
+    for b in cfg.get("branches", []):
+        days = []
+        for d in dates:
+            p = os.path.join(HERE, "data", f"{b}__{d.isoformat()}.json")
+            ex = os.path.isfile(p)
+            mt = os.path.getmtime(p) if ex else 0
+            days.append({"date": d.isoformat(), "weekday": WD_VN[d.weekday()],
+                         "has": ex, "age": _fmt_age(mt), "mtime": mt})
+        aux = {}
+        for suffix in ("cores", "locks"):
+            p = os.path.join(HERE, "data", f"{b}__{suffix}.json")
+            aux[suffix] = {"has": os.path.isfile(p),
+                           "age": _fmt_age(os.path.getmtime(p)) if os.path.isfile(p) else "—"}
+        have = sum(1 for x in days if x["has"])
+        branches.append({"branch": b, "days": days, "aux": aux,
+                         "have": have, "total": len(days)})
+    # lần cào gần nhất = file data mới nhất
+    files = glob.glob(os.path.join(HERE, "data", "*.json"))
+    files = [f for f in files if not os.path.basename(f).startswith(("_", "sample_"))]
+    newest = max((os.path.getmtime(f) for f in files), default=0)
+    return {"branches": branches, "interval_min": cfg.get("interval_min", 30),
+            "last_data_age": _fmt_age(newest), "last_data_ts": newest}
+
+
+def crawl_status() -> dict:
+    with _crawl["lock"]:
+        proc = _crawl["proc"]
+        if proc is not None and proc.poll() is not None:
+            _crawl["returncode"] = proc.returncode
+            _crawl["finished"] = _crawl["finished"] or dt.datetime.now().isoformat(timespec="seconds")
+            _crawl["proc"] = None
+        running = _crawl["proc"] is not None
+    log = ""
+    try:
+        with open(LOG_PATH, encoding="utf-8", errors="replace") as f:
+            log = "".join(f.readlines()[-40:])
+    except FileNotFoundError:
+        pass
+    return {"running": running, "started": _crawl["started"], "finished": _crawl["finished"],
+            "returncode": _crawl["returncode"], "log_tail": log, "coverage": crawl_coverage(),
+            "auto": {"enabled": _auto["enabled"], "interval_min": _auto["interval_min"],
+                     "next_run": _auto["next_run"]}}
+
+
+def start_crawl() -> dict:
+    with _crawl["lock"]:
+        if _crawl["proc"] is not None and _crawl["proc"].poll() is None:
+            return {"ok": False, "error": "đang chạy rồi"}
+        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+        logf = open(LOG_PATH, "w", encoding="utf-8")
+        env = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+        _crawl["proc"] = subprocess.Popen(
+            [sys.executable, os.path.join(HERE, "scheduler.py"), "--once"],
+            cwd=HERE, stdout=logf, stderr=subprocess.STDOUT, env=env)
+        _crawl["started"] = dt.datetime.now().isoformat(timespec="seconds")
+        _crawl["finished"] = None
+        _crawl["returncode"] = None
+    return {"ok": True}
+
+
+def auto_crawl_loop(interval_min: int, crawl_now: bool = True):
+    """Chạy nền: cào 1 lượt (nếu crawl_now) rồi mỗi interval_min phút cào tiếp."""
+    import time
+    _auto["enabled"] = True
+    _auto["interval_min"] = interval_min
+    if not crawl_now:
+        _auto["next_run"] = (dt.datetime.now() + dt.timedelta(minutes=interval_min)).isoformat(timespec="seconds")
+        time.sleep(interval_min * 60)
+    while True:
+        r = start_crawl()
+        print(f"[auto-crawl] {dt.datetime.now():%H:%M:%S} {'bắt đầu' if r.get('ok') else r.get('error')}")
+        # chờ tiến trình cào xong rồi mới tính lần kế
+        while _crawl["proc"] is not None and _crawl["proc"].poll() is None:
+            time.sleep(3)
+        _auto["next_run"] = (dt.datetime.now() + dt.timedelta(minutes=interval_min)).isoformat(timespec="seconds")
+        time.sleep(interval_min * 60)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -104,6 +342,21 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send(500, json.dumps({"error": str(e)}).encode(), "application/json")
             return
+        if path == "/api/directory":
+            try:
+                self._send(200, json.dumps(read_directory(), ensure_ascii=False).encode("utf-8"),
+                           "application/json; charset=utf-8")
+            except Exception as e:
+                self._send(500, json.dumps({"error": str(e)}).encode(), "application/json")
+            return
+        if path == "/api/config":
+            self._send(200, json.dumps(read_config(), ensure_ascii=False).encode("utf-8"),
+                       "application/json; charset=utf-8")
+            return
+        if path == "/api/crawl":
+            self._send(200, json.dumps(crawl_status(), ensure_ascii=False).encode("utf-8"),
+                       "application/json; charset=utf-8")
+            return
         # static: / -> viz/index.html ; /x -> viz/x
         rel = "index.html" if path in ("/", "") else path.lstrip("/")
         rel = posixpath.normpath(rel)
@@ -120,6 +373,31 @@ class Handler(BaseHTTPRequestHandler):
         with open(full, "rb") as f:
             self._send(200, f.read(), ctype)
 
+    def do_POST(self):
+        path = self.path.split("?", 1)[0]
+        if path == "/api/crawl/run":
+            res = start_crawl()
+            self._send(200 if res.get("ok") else 409,
+                       json.dumps(res, ensure_ascii=False).encode("utf-8"),
+                       "application/json; charset=utf-8")
+            return
+        if path != "/api/config":
+            self._send(404, b"not found", "text/plain")
+            return
+        try:
+            n = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(n).decode("utf-8")) if n else {}
+            branches = body.get("branches", [])
+            if not isinstance(branches, list):
+                raise ValueError("branches phải là list")
+            cfg = write_config_branches(branches)
+            self._send(200, json.dumps({"ok": True, "branches": cfg["branches"]},
+                                       ensure_ascii=False).encode("utf-8"),
+                       "application/json; charset=utf-8")
+        except Exception as e:
+            self._send(400, json.dumps({"ok": False, "error": str(e)}).encode(),
+                       "application/json; charset=utf-8")
+
     def log_message(self, *a):
         pass  # im lang
 
@@ -131,9 +409,13 @@ def main():
     except Exception:
         pass
     ap = argparse.ArgumentParser()
-    ap.add_argument("--port", type=int, default=8000)
+    ap.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8000)))
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--data", default="data")
+    ap.add_argument("--crawl", action="store_true",
+                    help="tự cào định kỳ ngay trong server (mỗi interval_min phút)")
+    ap.add_argument("--no-crawl-now", action="store_true",
+                    help="với --crawl: đợi hết 1 chu kỳ rồi mới cào lần đầu")
     args = ap.parse_args()
     Handler.data_dir = args.data
 
@@ -147,6 +429,16 @@ def main():
                    if not d["is_weekend"] and (ct, d["date"], s) not in occ)
         print(f"  - {g['branch_name']}: {len(g['courts'])} sân, {len(g['days'])} ngày, "
               f"{free} ô trống 18–22h (T2–T6)")
+
+    if args.crawl:
+        interval = read_config().get("interval_min", 30)
+        t = threading.Thread(target=auto_crawl_loop, args=(interval, not args.no_crawl_now),
+                             daemon=True)
+        t.start()
+        print(f"  [auto-crawl] BẬT — cào mỗi {interval} phút"
+              f"{' (lần đầu ngay)' if not args.no_crawl_now else ''}.")
+    else:
+        print("  [auto-crawl] TẮT — cào tay ở tab Cào dữ liệu, hoặc thêm --crawl, hoặc cron.")
 
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"\n  http://{args.host}:{args.port}\n  Ctrl+C để dừng.")

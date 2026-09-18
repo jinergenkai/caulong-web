@@ -1,0 +1,19 @@
+{
+  "note": "Danh bạ sân biết được (public branches.json + ID quan sát). Thêm sân mới bằng ô nhập trong tab Cài đặt, hoặc thả file branches API đã giải mã vào data/.",
+  "branches": [
+    {"id": "sport_bui_thi_xuan_badminton", "name": "Sân Cầu Lông Bùi Thị Xuân", "sport": "badminton"},
+    {"id": "sport_sky_phu_nhuan", "name": "Sân Sky Phú Nhuận", "sport": "badminton"},
+    {"id": "sport_minh_nhat_cn1", "name": "Sân cầu lông Minh Nhật", "sport": "badminton"},
+    {"id": "dong_an_1", "name": "Sân cầu lông Đông An", "sport": "badminton"},
+    {"id": "sport_tuong_anh_cn1", "name": "Sân Tường Anh", "sport": "badminton"},
+    {"id": "sport_tan_nguyen_cn1", "name": "Tân Nguyên - CN1", "sport": "badminton"},
+    {"id": "sport_tan_nguyen_cn2", "name": "Tân Nguyên - CN2", "sport": "badminton"},
+    {"id": "sport_tada_cn1", "name": "TADA - CN1", "sport": "badminton"},
+    {"id": "sport_tada_cn2", "name": "TADA - CN2", "sport": "badminton"},
+    {"id": "sport_tada_cn3", "name": "TADA - CN3", "sport": "badminton"},
+    {"id": "sport_dao_tri_cn1", "name": "Đảo Trí - CN1", "sport": "badminton"},
+    {"id": "sport_vu_thi_trang_badminton", "name": "Sân Vũ Thị Trang", "sport": "badminton"},
+    {"id": "sport_loca_badminton", "name": "Sân LOCA", "sport": "badminton"},
+    {"id": "sport_paddle_park", "name": "Paddle Park", "sport": "pickleball"}
+  ]
+}

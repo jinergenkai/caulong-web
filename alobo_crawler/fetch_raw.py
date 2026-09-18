@@ -19,6 +19,8 @@ _ENDPOINTS = {
     "get_lock_yards": "get_lock_yards/{branchId}",
     "get_cores": "get_cores/{branchId}",
     "get_core_types": "get_core_types/{branchId}",
+    "get_branch": "get_branch/{branchId}",
+    "products": "products/{branchId}",
 }
 
 # Giữ browser sống trong suốt lifetime của scheduler để không phải khởi động

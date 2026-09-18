@@ -62,9 +62,18 @@ def build_plan(cfg) -> list[dict]:
     plan = []
     dates = target_dates(cfg)
     for b in cfg["branches"]:
-        if cfg.get("fetch_cores_once"):
+        if cfg.get("fetch_branch", True):
+            plan.append({"endpoint": "get_branch", "params": {"branchId": b},
+                         "out": f"{b}__branch.json"})       # tên chi nhánh
+        if cfg.get("fetch_cores_once", True):
             plan.append({"endpoint": "get_cores", "params": {"branchId": b},
-                         "out": f"{b}__cores.json"})
+                         "out": f"{b}__cores.json"})        # danh sách sân
+        if cfg.get("fetch_core_types", True):
+            plan.append({"endpoint": "get_core_types", "params": {"branchId": b},
+                         "out": f"{b}__core_types.json"})   # GIÁ sân theo giờ
+        if cfg.get("fetch_products", False):
+            plan.append({"endpoint": "products", "params": {"branchId": b},
+                         "out": f"{b}__products.json"})      # (hàng bán - không cần)
         if cfg.get("fetch_lock_yards"):
             plan.append({"endpoint": "get_lock_yards", "params": {"branchId": b},
                          "out": f"{b}__locks.json"})
@@ -118,7 +127,10 @@ def run_pass(cfg, dry=False) -> None:
         try:
             env = fetch_raw(p["endpoint"], p["params"])   # BẠN viết
             data = decrypt(env)                            # BẠN viết
-            data = adapt_redact(data)                      # vứt PII trước khi ghi
+            # chỉ redact file BOOKING (có thể chứa PII khách/người tạo);
+            # file cấu hình sân (branch/cores/core_types/products) giữ nguyên
+            if p["endpoint"] in ("get_onetime_bookings", "get_schedule_bookings", "get_lock_yards"):
+                data = adapt_redact(data)
             with open(os.path.join(DATA, p["out"]), "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False)
             done += 1

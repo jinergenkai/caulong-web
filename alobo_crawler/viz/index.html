@@ -62,15 +62,35 @@
     border-radius:50%;background:var(--free);}
   td.cell.booked{background:var(--booked-bg);}
   td.cell.booked::after{content:"";position:absolute;inset:6px;border-radius:3px;background:var(--booked);opacity:.55;}
-  td.cell.locked{background:var(--locked-bg);}
+  td.cell.locked{background:var(--locked-bg);
+    background-image:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(128,128,128,.35) 4px,rgba(128,128,128,.35) 5px);}
   td.cell.event{background:var(--event-bg);}
   td.cell.event::after{content:"★";position:absolute;inset:0;display:flex;align-items:center;
     justify-content:center;color:var(--event);font-size:12px;}
   td.cell.dim{opacity:.34;}
+  /* day view: trục giờ ở vạch ranh giới (so le), ô rộng hơn */
+  table.day td.cell{width:46px;}
+  table.day th.tcol{position:relative;padding:0;height:18px;border:0;}
+  table.day th.tcol .l,table.day th.tcol .r{position:absolute;bottom:0;font-size:11px;
+    font-weight:600;color:var(--ink2);white-space:nowrap;}
+  table.day th.tcol .l{left:0;transform:translateX(-50%);}
+  table.day th.tcol .l.first{transform:none;}
+  table.day th.tcol .r{right:0;transform:none;}
   td.cell.hl-free{box-shadow:inset 0 0 0 2px var(--free);}
   /* overview */
   td.ov{width:52px;height:34px;border-radius:6px;text-align:center;font-weight:700;font-size:13px;color:var(--ink);}
   td.ov small{display:block;font-weight:500;font-size:9.5px;color:var(--ink2);}
+  /* overview mini-timeline */
+  td.ov2{padding:3px 5px;vertical-align:middle;min-width:62px;}
+  .minibar{display:flex;gap:1.5px;height:15px;border-radius:4px;overflow:hidden;}
+  .minibar i{flex:1;min-width:3px;}
+  .minibar i.free{background:var(--free);}
+  .minibar i.booked{background:var(--booked);}
+  .minibar i.event{background:var(--event);}
+  .minibar i.locked{background:var(--locked);
+    background-image:repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(255,255,255,.35) 2px,rgba(255,255,255,.35) 3px);}
+  .ovh{text-align:center;font-size:10.5px;font-weight:700;color:var(--ink2);margin-top:2px;line-height:1;}
+  .ovh small{font-weight:500;color:var(--muted);}
 
   .hint{color:var(--muted);font-size:12.5px;margin-top:10px;}
   .free-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
@@ -103,9 +123,13 @@
         <select id="branchSel"></select>
       </span>
       <div class="seg" id="viewSeg">
-        <button data-v="overview" class="on">Tổng quan</button>
-        <button data-v="detail">Chi tiết sân</button>
+        <button data-v="day" class="on">Theo ngày</button>
+        <button data-v="overview">Tổng quan</button>
+        <button data-v="crawl">⟳ Cào dữ liệu</button>
+        <button data-v="settings">⚙ Cài đặt sân</button>
       </div>
+      <span id="sportPick" style="display:none">Môn: <select id="sportSel"></select></span>
+      <span id="dayPick" style="display:none">Ngày: <select id="daySel"></select></span>
       <label class="toggle"><input type="checkbox" id="focusChk" checked> Chỉ 18:00–22:00</label>
       <label class="toggle"><input type="checkbox" id="wdChk" checked> Chỉ T2–T6</label>
       <span id="courtPick" style="display:none">
@@ -115,17 +139,70 @@
     <div class="legend" id="legend"></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="mainCard">
     <div id="board" class="scroll"></div>
     <div id="freePanel"></div>
     <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="card" id="crawlCard" hidden>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-weight:700">Cào dữ liệu</div>
+        <div class="hint" style="margin-top:0" id="crawlMeta"></div>
+      </div>
+      <button id="crawlBtn" style="background:var(--accent);color:#fff;border:0;border-radius:10px;
+        padding:10px 20px;font:inherit;font-weight:700;cursor:pointer">⟳ Cào lại ngay</button>
+    </div>
+    <div id="crawlState" class="hint" style="margin-top:10px"></div>
+    <div id="coverage" style="margin-top:8px" class="scroll"></div>
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--ink2);font-weight:600">Log lần cào gần nhất</summary>
+      <pre id="crawlLog" style="background:var(--line2);border-radius:10px;padding:12px;margin-top:8px;
+        font-size:12px;overflow:auto;max-height:280px;white-space:pre-wrap"></pre>
+    </details>
+    <div class="hint" style="margin-top:12px">
+      Nút này chạy <code>scheduler.py --once</code> (Playwright của bạn gọi API + giải mã).
+      Tự động định kỳ: chạy <code>python scheduler.py</code> (lặp mỗi <span id="ivMin">30</span>′)
+      hoặc đặt cron/Task Scheduler.
+    </div>
+  </div>
+
+  <div class="card" id="settingsCard" hidden>
+    <div style="font-weight:700;margin-bottom:2px">Sân đang theo dõi</div>
+    <div class="hint" style="margin-top:0">Tick để thêm/bỏ. Bấm “Lưu” ghi vào <code>config.json</code> — scheduler quét đúng danh sách này.</div>
+    <div id="dirList" style="margin-top:12px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px">
+      <input id="addBranch" placeholder="branchId khác (vd sport_xyz_badminton)"
+        style="flex:1;min-width:220px;font:inherit;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
+      <button id="addBtn" class="seg" style="padding:7px 14px;cursor:pointer;font-weight:600">+ Thêm</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+      <button id="saveBtn" style="background:var(--accent);color:#fff;border:0;border-radius:10px;
+        padding:9px 18px;font:inherit;font-weight:700;cursor:pointer">Lưu</button>
+      <span id="saveMsg" class="hint" style="margin:0"></span>
+    </div>
+    <div class="hint" style="margin-top:16px">
+      Lấy đủ danh bạ sân từ API <code>get_quick_search</code>/<code>branches</code> (đã mã hoá):
+      giải mã rồi thả file vào <code>data/</code>, sân sẽ hiện ở đây. Xem <code>API_ENDPOINTS.md</code>.
+    </div>
   </div>
 </div>
 <div class="tip" id="tip"></div>
 
 <script>
 const WD_FULL = {T2:"Thứ 2",T3:"Thứ 3",T4:"Thứ 4",T5:"Thứ 5",T6:"Thứ 6",T7:"Thứ 7",CN:"Chủ nhật"};
-let DATA=null, G=null, state={view:"overview", court:null, focus:true, wd:true};
+let DATA=null, G=null, state={view:"day", date:null, focus:true, wd:true, sport:null};
+const SPORT_LABEL={badminton:"Cầu lông", pickleball:"Pickleball", all:"Tất cả"};
+function courtsInView(){
+  if(!state.sport||state.sport==="all") return G.courts;
+  const m=G.court_sport||{};
+  return G.courts.filter(c=>(m[c]||"badminton")===state.sport);
+}
+function sportsAvailable(){
+  const m=G.court_sport||{}; const set=new Set(G.courts.map(c=>m[c]||"badminton"));
+  return [...set];
+}
 const tip = document.getElementById('tip');
 
 function fmtDate(iso){const [y,m,d]=iso.split('-');return `${d}/${m}`;}
@@ -148,81 +225,139 @@ function showTip(e,html){ tip.innerHTML=html; tip.style.opacity=1;
   tip.style.left=x+"px"; tip.style.top=(e.clientY-tip.offsetHeight-8)+"px"; }
 function hideTip(){ tip.style.opacity=0; }
 
-/* ---------- Tổng quan: sân × ngày, số ô trống buổi (focus) ---------- */
+function priceAt(court,date,slot){
+  const P=G.prices; if(!P) return null;
+  const jsw=new Date(date+'T00:00:00').getDay();   // 0=CN..6=T7
+  const w=(jsw+6)%7;                                // ->0=T2..6=CN
+  for(const key of [court,'*']){ for(const r of (P[key]||[])){
+    if((r.days===null||r.days.includes(w)) && r.start<=slot && slot<r.end) return r.price; } }
+  return null;
+}
+function fmtPrice(n){ if(n==null) return '';
+  if(n>=1000000) return (n/1000000).toFixed(n%1000000?1:0)+'tr';
+  if(n>=1000) return Math.round(n/1000)+'k'; return ''+n; }
+function priceRange(courts,date,slots){
+  const set=new Set();
+  courts.forEach(c=>slots.forEach(s=>{const p=priceAt(c,date,s); if(p!=null) set.add(p);}));
+  const a=[...set].sort((x,y)=>x-y);
+  if(!a.length) return null;
+  return a.length===1?fmtPrice(a[0]):`${fmtPrice(a[0])}–${fmtPrice(a[a.length-1])}`;
+}
+function courtMaxPrice(court){
+  const P=G.prices; if(!P) return null; let mx=null;
+  for(const key of [court,'*']) for(const r of (P[key]||[])) if(mx==null||r.price>mx) mx=r.price;
+  return mx;
+}
+function branchMaxPrice(){
+  if(!G.prices) return null; let mx=null;
+  for(const c of courtsInView()){ const m=courtMaxPrice(c); if(m!=null&&(mx==null||m>mx)) mx=m; }
+  return mx;
+}
+
+/* ---------- Tổng quan: sân × ngày, mỗi ô = mini-timeline chia khúc ---------- */
+function hourBuckets(slots){
+  const hk=[...new Set(slots.map(s=>s.slice(0,2)))];
+  return hk.map(h=>({h, slots:slots.filter(s=>s.slice(0,2)===h)}));
+}
 function renderOverview(){
   const slots=slotsInView(), days=daysInView();
-  const max=slots.length;
-  const ramp=(n)=>{ if(n<=0)return"var(--g0)"; const q=n/max;
-    return q<=.2?"var(--g1)":q<=.4?"var(--g2)":q<=.7?"var(--g3)":q<.999?"var(--g4)":"var(--g5)";};
+  const hours=hourBuckets(slots);
   let h='<table class="hm"><thead><tr><th class="row"></th>';
   days.forEach(d=>{h+=`<th class="col ${d.is_weekend?'weekday-w':''}">${d.weekday}<br><span class="sub">${fmtDate(d.date)}</span></th>`;});
   h+='</tr></thead><tbody>';
-  G.courts.forEach(ct=>{
+  courtsInView().forEach(ct=>{
     h+=`<tr><th class="row">${ct}</th>`;
     days.forEach(d=>{
-      let free=0; slots.forEach(s=>{ if(statusAt(ct,d.date,s)==="free") free++; });
-      const full = free===0;
-      h+=`<td class="ov" data-ct="${ct}" data-date="${d.date}" data-free="${free}" data-tot="${slots.length}"
-            style="background:${ramp(free)};${full?'color:var(--muted)':''}">${free}<small>/${slots.length}</small></td>`;
+      // khúc theo GIỜ (gộp 2 nửa) cho gọn — 1 giờ = 1 khúc, trạng thái xấu nhất trong giờ
+      const segs=hours.map(hb=>{
+        const sts=hb.slots.map(s=>statusAt(ct,d.date,s));
+        const st = sts.includes('booked')?'booked' : sts.includes('locked')?'locked'
+                 : sts.includes('event')?'event' : sts.every(x=>x==='free')?'free':'booked';
+        return st;
+      });
+      const freeH=segs.filter(x=>x==='free').length;
+      const bar=segs.map(st=>`<i class="${st}"></i>`).join('');
+      h+=`<td class="ov2" data-ct="${ct}" data-date="${d.date}" data-free="${freeH}" data-tot="${hours.length}">
+            <div class="minibar">${bar}</div>
+            <div class="ovh" style="${freeH?'color:var(--free)':''}">${freeH}<small>/${hours.length}</small></div>
+          </td>`;
     });
     h+='</tr>';
   });
   h+='</tbody></table>';
   const b=document.getElementById('board'); b.innerHTML=h;
-  b.querySelectorAll('td.ov').forEach(td=>{
-    td.onmousemove=e=>{ const f=+td.dataset.free, t=+td.dataset.tot;
-      const dObj=G.days.find(x=>x.date===td.dataset.date);
+  b.querySelectorAll('td.ov2').forEach(td=>{
+    td.onmousemove=e=>{ const dObj=G.days.find(x=>x.date===td.dataset.date);
+      const freeList=hours.filter(hb=>hb.slots.every(s=>statusAt(td.dataset.ct,td.dataset.date,s)==='free'))
+                          .map(hb=>hb.h+'h');
       showTip(e,`<b>${td.dataset.ct}</b> · ${WD_FULL[dObj.weekday]} ${fmtDate(td.dataset.date)}<br>
-        ${f} / ${t} ô trống ${state.focus?'(18–22h)':''}`); };
+        ${td.dataset.free}/${td.dataset.tot} giờ trống${freeList.length?': '+freeList.join(', '):''}`); };
     td.onmouseleave=hideTip;
-    td.onclick=()=>{ state.view="detail"; state.court=td.dataset.ct; syncControls(); render(); };
+    td.onclick=()=>{ state.view="day"; state.date=td.dataset.date; syncControls(); render(); };
   });
   document.getElementById('freePanel').innerHTML='';
-  document.getElementById('hint').textContent="Số = ô trống mỗi sân theo ngày. Bấm một ô để xem chi tiết sân đó. Ô càng xanh càng nhiều chỗ trống.";
+  document.getElementById('hint').innerHTML="Mỗi ô = buổi tối của một sân, chia theo <b>giờ</b>: xanh = trống, đỏ = đã đặt, xám = khoá. Số = <b>giờ trống/tổng giờ</b>. Bấm ô để xem chi tiết ngày.";
 }
 
 /* ---------- Chi tiết: 1 sân, ngày × giờ ---------- */
-function renderDetail(){
-  const ct=state.court||G.courts[0]; state.court=ct;
-  const slots=slotsInView(), days=daysInView();
-  let h='<table class="hm"><thead><tr><th class="row"></th>';
-  slots.forEach(s=>{h+=`<th class="col">${s}</th>`;});
+const STLABEL={free:"Trống",booked:"Đã đặt",locked:"Khoá (chờ mở)",event:"Sự kiện"};
+function ensureDay(){
+  const sel=document.getElementById('daySel');
+  if(sel.dataset.branch!==G.branch){
+    sel.innerHTML=G.days.map(d=>`<option value="${d.date}">${WD_FULL[d.weekday]} · ${fmtDate(d.date)}</option>`).join('');
+    sel.dataset.branch=G.branch;
+    if(!G.days.some(d=>d.date===state.date)) state.date=null;
+  }
+  if(!state.date) state.date = (G.days.find(d=>!d.is_weekend)||G.days[0]||{}).date;
+  sel.value=state.date;
+}
+function renderDay(){
+  ensureDay();
+  const date=state.date; const dObj=G.days.find(x=>x.date===date)||{weekday:''};
+  const slots=slotsInView(), courts=courtsInView(), step=G.slot_minutes||30;
+  const addMin=(t,m)=>{let[a,b]=t.split(':').map(Number);let x=a*60+b+m;
+    return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');};
+  // bảng: HÀNG = sân, CỘT = giờ. Nhãn giờ ở VẠCH ranh giới (so le), có cả mốc cuối.
+  let h='<table class="hm day"><thead><tr><th class="row"></th>';
+  const onHour=t=>t.endsWith(':00');
+  slots.forEach((s,i)=>{ const last=i===slots.length-1; const end=addMin(s,step);
+    const lab=onHour(s)?`<span class="l${i===0?' first':''}">${s}</span>`:'';
+    const endLab=(last&&onHour(end))?`<span class="r">${end}</span>`:'';
+    h+=`<th class="tcol">${lab}${endLab}</th>`;});
   h+='</tr></thead><tbody>';
-  days.forEach(d=>{
-    h+=`<tr><th class="row ${d.is_weekend?'weekday-w':''}">${d.weekday} <span class="sub">${fmtDate(d.date)}</span></th>`;
+  courts.forEach(c=>{
+    h+=`<tr><th class="row">${c}</th>`;
     slots.forEach(s=>{
-      const st=statusAt(ct,d.date,s);
-      h+=`<td class="cell ${st}" data-date="${d.date}" data-slot="${s}" data-st="${st}"></td>`;
+      const st=statusAt(c,date,s);
+      h+=`<td class="cell ${st}" data-c="${c}" data-slot="${s}" data-st="${st}"></td>`;
     });
     h+='</tr>';
   });
-  h+='</tbody></table>';
+  // hàng chân: số sân trống mỗi khung giờ
+  h+='<tr><th class="row" style="color:var(--free);font-weight:700">Trống</th>';
+  slots.forEach(s=>{
+    const n=courts.filter(c=>statusAt(c,date,s)==="free").length;
+    h+=`<td style="text-align:center;font-weight:700;color:${n?'var(--free)':'var(--muted)'}">${n||'·'}</td>`;
+  });
+  h+='</tr></tbody></table>';
   const b=document.getElementById('board'); b.innerHTML=h;
-  const label={free:"Trống",booked:"Đã đặt",locked:"Khoá",event:"Sự kiện"};
   b.querySelectorAll('td.cell').forEach(td=>{
-    td.onmousemove=e=>{ const dObj=G.days.find(x=>x.date===td.dataset.date);
-      showTip(e,`<b>${ct}</b> · ${WD_FULL[dObj.weekday]} ${fmtDate(td.dataset.date)}<br>
-        ${td.dataset.slot} — <b style="color:${td.dataset.st==='free'?'var(--free)':'inherit'}">${label[td.dataset.st]}</b>`); };
+    td.onmousemove=e=>{ const pr=priceAt(td.dataset.c,date,td.dataset.slot);
+      const ps=pr!=null?` · <b style="color:var(--accent)">${fmtPrice(pr)}/giờ</b>`:'';
+      showTip(e,`<b>${td.dataset.c}</b> · ${td.dataset.slot}<br>
+        <b style="color:${td.dataset.st==='free'?'var(--free)':(td.dataset.st==='locked'?'var(--event)':'inherit')}">${STLABEL[td.dataset.st]}</b>${ps}`); };
     td.onmouseleave=hideTip;
   });
-  // panel: liet ke o trong theo ngay
-  let fp=`<div class="hint" style="margin-top:14px"><b>Ô trống của ${ct}</b></div>`;
-  days.forEach(d=>{
-    const free=slots.filter(s=>statusAt(ct,d.date,s)==="free");
-    fp+=`<div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
-      <span class="sub" style="min-width:96px">${d.weekday} ${fmtDate(d.date)}</span>`;
-    if(free.length) fp+='<div class="free-list">'+free.map(s=>`<span class="chip">${s}</span>`).join('')+'</div>';
-    else fp+='<span class="chip none">kín</span>';
-    fp+='</div>';
-  });
-  document.getElementById('freePanel').innerHTML=fp;
+  // dòng giá khung tối (nếu có products)
+  const rng=priceRange(courts,date,slots);
+  document.getElementById('freePanel').innerHTML = rng
+    ? `<div class="hint" style="margin-top:12px">💵 Giá ${state.focus?'khung 18–22h':'trong ngày'}: <b>${rng}/giờ</b>${rng.includes('–')?' (nhiều mức — hover từng ô)':''}</div>`
+    : '';
   document.getElementById('hint').textContent="";
 }
 
 function renderLegend(){
-  const items = state.view==="detail"
-    ? [["free","Trống"],["booked","Đã đặt"],["locked","Khoá"],["event","Sự kiện"]]
-    : [["g1","ít chỗ"],["g3","vừa"],["g5","nhiều chỗ trống"],["g0","kín"]];
+  const items = [["free","Trống"],["booked","Đã đặt"],["locked","Khoá (chờ mở)"],["event","Sự kiện"]];
   const swClass={locked:"hatch"};
   document.getElementById('legend').innerHTML = items.map(([k,l])=>{
     const isStat=["free","booked","locked","event"].includes(k);
@@ -237,41 +372,139 @@ function renderKpis(){
   const slots=G.slots.filter(s=>s>="18:00"&&s<"22:00");
   const days=G.days.filter(d=>!d.is_weekend);
   let free=0,total=0;
-  G.courts.forEach(ct=>days.forEach(d=>slots.forEach(s=>{total++; if(statusAt(ct,d.date,s)==="free")free++;})));
-  const daysWithFree=days.filter(d=>G.courts.some(ct=>slots.some(s=>statusAt(ct,d.date,s)==="free"))).length;
+  const CV=courtsInView();
+  CV.forEach(ct=>days.forEach(d=>slots.forEach(s=>{total++; if(statusAt(ct,d.date,s)==="free")free++;})));
+  const daysWithFree=days.filter(d=>CV.some(ct=>slots.some(s=>statusAt(ct,d.date,s)==="free"))).length;
+  const bmp=branchMaxPrice();
   document.getElementById('kpis').innerHTML=`
     <div class="kpi good"><b>${free}</b><span>ô trống 18–22h (T2–T6)</span></div>
     <div class="kpi"><b>${daysWithFree}/${days.length}</b><span>ngày T2–T6 có chỗ</span></div>
-    <div class="kpi"><b>${G.courts.length}</b><span>sân</span></div>
-    <div class="kpi"><b>${G.days.length}</b><span>ngày theo dõi</span></div>`;
+    <div class="kpi"><b>${CV.length}</b><span>sân</span></div>`
+    + (bmp!=null?`<div class="kpi"><b style="color:var(--accent)">${fmtPrice(bmp)}</b><span>giá trần / giờ</span></div>`
+                : `<div class="kpi"><b>${G.days.length}</b><span>ngày theo dõi</span></div>`);
 }
 
 function syncControls(){
   document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
-  document.getElementById('courtPick').style.display = state.view==="detail"?"":"none";
   document.getElementById('focusChk').checked=state.focus;
   document.getElementById('wdChk').checked=state.wd;
-  const sel=document.getElementById('courtSel');
-  if(sel.options.length!==G.courts.length){ sel.innerHTML=G.courts.map(c=>`<option>${c}</option>`).join(''); }
-  if(state.court) sel.value=state.court;
 }
 
 function render(){
+  const isSettings = state.view==="settings";
+  const isCrawl = state.view==="crawl";
+  const isChart = !isSettings && !isCrawl;
+  document.getElementById('mainCard').hidden = !isChart;
+  document.getElementById('settingsCard').hidden = !isSettings;
+  document.getElementById('crawlCard').hidden = !isCrawl;
+  document.getElementById('focusChk').closest('.toggle').style.display = isChart?'':'none';
+  const hasWeekend = G && G.days.some(d=>d.is_weekend);
+  document.getElementById('wdChk').closest('.toggle').style.display =
+    (isChart && state.view==="overview" && hasWeekend)?'':'none';
+  document.getElementById('courtPick').style.display='none';
+  document.getElementById('dayPick').style.display = (isChart && state.view==="day")?'':'none';
+  document.getElementById('branchPick').style.display =
+    (isChart && DATA && DATA.branches.length>1)?'':'none';
+  // bộ lọc môn — chỉ hiện khi sân có >1 môn
+  const av=G?sportsAvailable():[];
+  const sp=document.getElementById('sportPick'), ss=document.getElementById('sportSel');
+  if(isChart && av.length>1){
+    sp.style.display='';
+    const opts=[...av,'all'];
+    if(ss.options.length!==opts.length||ss.dataset.b!==G.branch){
+      ss.innerHTML=opts.map(x=>`<option value="${x}">${SPORT_LABEL[x]||x}</option>`).join('');
+      ss.dataset.b=G.branch;
+    }
+    ss.value=state.sport;
+  } else sp.style.display='none';
+  document.getElementById('legend').style.display = isChart?'':'none';
+  if(isSettings){ renderSettings(); return; }
+  if(isCrawl){ renderCrawl(); return; }
   renderLegend();
-  if(state.view==="overview") renderOverview(); else renderDetail();
-  const noteEl=document.getElementById('hint');
-  if(weekendOnly()){
-    noteEl.innerHTML='⚠️ Dữ liệu hiện chỉ có ngày cuối tuần — đang tạm hiển thị tất cả. '
-      +'Bỏ tick “Chỉ T2–T6” hoặc thêm file ngày trong tuần.';
-  }
+  if(state.view==="overview") renderOverview(); else renderDay();
+}
+
+let DIR=null;
+function renderSettings(){
+  const box=document.getElementById('dirList');
+  if(!DIR){ box.innerHTML='<span class="hint">Đang tải…</span>';
+    fetch('/api/directory').then(r=>r.json()).then(d=>{DIR=d; drawDir();}); return; }
+  drawDir();
+}
+function drawDir(){
+  const box=document.getElementById('dirList');
+  box.innerHTML = DIR.branches.map(b=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);
+      border-radius:10px;margin-bottom:7px;cursor:pointer;background:var(--panel)">
+      <input type="checkbox" class="dirchk" data-id="${b.id}" ${b.monitored?'checked':''} style="width:16px;height:16px;accent-color:var(--accent)">
+      <span style="flex:1"><b>${b.name}</b>
+        <span class="hint" style="margin:0"> · ${b.id}${b.sport?' · '+b.sport:''}</span></span>
+      ${b.has_data?'<span class="chip">có dữ liệu</span>':''}
+    </label>`).join('');
+}
+function currentSelection(){
+  return [...document.querySelectorAll('.dirchk')].filter(c=>c.checked).map(c=>c.dataset.id);
+}
+
+/* ---------- Cào dữ liệu ---------- */
+let crawlPoll=null;
+function renderCrawl(){ fetchCrawl(); }
+function fetchCrawl(){
+  fetch('/api/crawl').then(r=>r.json()).then(drawCrawl).catch(()=>{});
+}
+function drawCrawl(s){
+  const cov=s.coverage;
+  document.getElementById('ivMin').textContent=cov.interval_min;
+  const au=s.auto||{};
+  const autoTxt = au.enabled
+    ? `<span style="color:var(--free)">● Tự động BẬT</span> · mỗi ${au.interval_min}′`
+      + (au.next_run?` · lần tới ${au.next_run.slice(11,16)}`:'')
+    : `<span style="color:var(--muted)">○ Tự động TẮT</span> · cào tay / cron`;
+  document.getElementById('crawlMeta').innerHTML=
+    `Lần cào gần nhất: <b>${cov.last_data_age}</b> · ${cov.branches.length} sân · ${autoTxt}`;
+  const btn=document.getElementById('crawlBtn');
+  btn.disabled=s.running; btn.textContent=s.running?'⟳ Đang cào…':'⟳ Cào lại ngay';
+  btn.style.opacity=s.running?.6:1; btn.style.cursor=s.running?'default':'pointer';
+  let st='';
+  if(s.running) st=`<span style="color:var(--accent)">● Đang cào (bắt đầu ${s.started||''})…</span>`;
+  else if(s.finished) st=`Xong lúc ${s.finished}`+(s.returncode?` <span style="color:var(--booked)">(mã lỗi ${s.returncode})</span>`:' ✓');
+  document.getElementById('crawlState').innerHTML=st;
+  document.getElementById('crawlLog').textContent=s.log_tail||'(chưa có log)';
+
+  // bảng coverage: branch × ngày
+  let h='';
+  cov.branches.forEach(b=>{
+    const pct=b.total?Math.round(100*b.have/b.total):0;
+    h+=`<div style="margin-top:14px"><b>${b.branch}</b> — ${b.have}/${b.total} ngày có dữ liệu
+        · Khoá: ${b.aux.locks.has?b.aux.locks.age:'chưa'} · Sân(cores): ${b.aux.cores.has?b.aux.cores.age:'chưa'}</div>`;
+    h+='<table class="hm" style="margin-top:6px"><tbody><tr>';
+    b.days.forEach(d=>{
+      const bg=d.has?'var(--free-bg)':'var(--booked-bg)';
+      const ring=d.has?'box-shadow:inset 0 0 0 1.5px var(--free-ring)':'';
+      h+=`<td title="${d.date} · ${d.has?('cào '+d.age):'chưa có'}" style="width:44px;height:34px;border-radius:6px;
+        text-align:center;font-size:10.5px;background:${bg};${ring};color:var(--ink2)">
+        ${d.weekday}<br>${d.date.slice(8)}</td>`;
+    });
+    h+='</tr></tbody></table>';
+  });
+  if(!cov.branches.length) h='<div class="hint">Chưa cấu hình sân nào — vào tab ⚙ Cài đặt sân.</div>';
+  document.getElementById('coverage').innerHTML=h;
+
+  // poll khi đang chạy
+  if(s.running && !crawlPoll){ crawlPoll=setInterval(fetchCrawl,2000); }
+  if(!s.running && crawlPoll){ clearInterval(crawlPoll); crawlPoll=null;
+    if(DATA){ fetch('/api/data').then(r=>r.json()).then(p=>{p.branches.sort((a,b)=>(a.branch==="demo")-(b.branch==="demo")); DATA=p;}); } }
 }
 
 function selectBranch(i){
   G=DATA.branches[i]; delete G.__occ;
+  const bs=document.getElementById('branchSel'); if(bs && bs.options.length) bs.value=String(i);
   document.getElementById('title').textContent=G.branch_name;
   document.getElementById('subtitle').textContent=
     `${G.days.length} ngày · ${G.courts.length} sân · cập nhật ${(new Date()).toLocaleString('vi-VN')}`;
-  state.court=G.courts[0];
+  state.date=null;
+  const av=sportsAvailable();
+  state.sport = av.length>1 ? (av.includes("badminton")?"badminton":av[0]) : "all";
   renderKpis(); syncControls(); render();
 }
 
@@ -297,7 +530,32 @@ document.getElementById('viewSeg').onclick=e=>{ const b=e.target.closest('button
   state.view=b.dataset.v; syncControls(); render(); };
 document.getElementById('focusChk').onchange=e=>{state.focus=e.target.checked; render();};
 document.getElementById('wdChk').onchange=e=>{state.wd=e.target.checked; render();};
-document.getElementById('courtSel').onchange=e=>{state.court=e.target.value; render();};
+document.getElementById('daySel').onchange=e=>{state.date=e.target.value; render();};
+document.getElementById('sportSel').onchange=e=>{state.sport=e.target.value; renderKpis(); render();};
+document.getElementById('addBtn').onclick=()=>{
+  const inp=document.getElementById('addBranch'); const id=inp.value.trim();
+  if(!/^[a-z0-9_\-]{2,80}$/.test(id)){ document.getElementById('saveMsg').textContent='branchId không hợp lệ'; return; }
+  if(!DIR.branches.some(b=>b.id===id)) DIR.branches.unshift({id,name:id,sport:'',monitored:true,has_data:false});
+  else DIR.branches.find(b=>b.id===id).monitored=true;
+  inp.value=''; drawDir();
+};
+document.getElementById('crawlBtn').onclick=()=>{
+  const btn=document.getElementById('crawlBtn'); if(btn.disabled) return;
+  document.getElementById('crawlState').innerHTML='<span style="color:var(--accent)">● Bắt đầu…</span>';
+  fetch('/api/crawl/run',{method:'POST'}).then(r=>r.json()).then(res=>{
+    if(!res.ok) document.getElementById('crawlState').textContent='Lỗi: '+(res.error||'?');
+    setTimeout(fetchCrawl,500);
+  }).catch(e=>{ document.getElementById('crawlState').textContent='Lỗi: '+e; });
+};
+document.getElementById('saveBtn').onclick=()=>{
+  const sel=currentSelection(); const msg=document.getElementById('saveMsg');
+  msg.textContent='Đang lưu…';
+  fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({branches:sel})}).then(r=>r.json()).then(d=>{
+    msg.textContent = d.ok ? `✓ Đã lưu ${d.branches.length} sân vào config.json. Chạy: python scheduler.py --once`
+                           : ('Lỗi: '+(d.error||'?'));
+  }).catch(e=>{ msg.textContent='Lỗi: '+e; });
+};
 
 fetch('/api/data').then(r=>r.json()).then(boot).catch(err=>{
   document.getElementById('board').innerHTML='<p class="hint">Không tải được dữ liệu: '+err+'</p>';

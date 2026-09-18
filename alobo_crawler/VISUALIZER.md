@@ -41,17 +41,24 @@ còn lại trong giờ hoạt động = **trống**. Tải lại trang là thấ
 
 ## Giao diện
 
-- **Tổng quan**: lưới sân × ngày, mỗi ô = số ô trống buổi tối (càng xanh càng nhiều chỗ).
-  Bấm một ô → nhảy sang chi tiết sân đó.
-- **Chi tiết sân**: lưới ngày × giờ cho một sân; ô trống viền xanh + chấm, đã đặt đỏ,
-  khoá xám, sự kiện ★ tím. Bên dưới liệt kê giờ trống từng ngày (chip xanh).
-- Lọc **18:00–22:00** và **T2–T6** (bật sẵn — đúng mục tiêu). Bỏ tick để xem cả ngày / cả tuần.
+- **Theo ngày** (mặc định): chọn 1 ngày → lưới **giờ × sân**; ô trống viền xanh + chấm,
+  đã đặt đỏ, **khoá kẻ sọc** (mở nhưng chưa book được — rình khi mở), sự kiện ★ tím.
+  Cột "Trống" đếm số sân trống mỗi khung; bên dưới liệt kê **khung giờ còn sân nào** +
+  "⏳ N khoá". Đúng cho: chọn Thứ 5, xem 18–20h còn sân nào.
+- **Tổng quan**: lưới sân × ngày, mỗi ô = số ô trống buổi tối (càng xanh càng nhiều).
+  Bấm một ô → mở "Theo ngày" của ngày đó.
+- Lọc **18:00–22:00** (bật sẵn). Bỏ tick để xem cả ngày.
 - Hover xem chi tiết. Sáng/tối tự theo hệ thống. Chạy tốt trên điện thoại.
 
-## Trạng thái
+## Trạng thái (đã gộp đủ)
 
-- `get_onetime_bookings` chỉ có **đặt lẻ**. Muốn đủ, gộp thêm `get_lock_yards` (Khoá)
-  và `get_schedule_bookings?month=...` (đặt tháng) — adapter đã chừa status `locked`/`event`,
-  bổ sung khi bạn có dữ liệu đó.
-- File đang có: `server.py` (server), `adapt.py` (chuẩn hoá shape thật), `viz/index.html`
-  (giao diện), `data/sample_*.json` (mẫu).
+Server tự gộp mỗi branch từ các file trong `data/`:
+- `<branch>__<ngày>.json` (`get_onetime_bookings`) → **Đã đặt** (đặt lẻ).
+- `<branch>__schedule_*.json` (`get_schedule_bookings`) → **Đã đặt** (đặt tháng).
+- `<branch>__locks.json` (`get_lock_yards`) → **Khoá** (sân mở nhưng chặn book).
+- `<branch>__cores.json` (`get_cores`) → **tên + thứ tự + danh sách sân thật**.
+
+Ưu tiên hiển thị: Đã đặt > Khoá > Trống. "Trống" = sân tồn tại, **không** đặt **và không** khoá.
+
+File: `server.py` (server + control), `adapt.py` (chuẩn hoá + gộp status),
+`viz/index.html` (giao diện), `data/sample_*.json` (mẫu).

@@ -4,8 +4,8 @@
     {
       "name": "alobo-heatmap",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["alobo_crawler/server.py", "--port", "8000"],
-      "port": 8000
+      "runtimeArgs": ["alobo_crawler/server.py"],
+      "autoPort": true
     }
   ]
 }
