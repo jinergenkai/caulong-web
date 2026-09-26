@@ -120,6 +120,7 @@ def load_data(data_dir: str) -> dict:
                 if m:
                     s["dates"].add(m.group(0))   # ngay da CAO (du rong hay ban)
 
+    window = _window_dates()   # {hôm nay .. hôm nay + N-1} — ẩn ngày đã qua / ngoài cửa sổ
     out = []
     for key, s in branches.items():
         cores = adapt.courts_from_cores(s["cores"]) if s["cores"] else []
@@ -133,13 +134,16 @@ def load_data(data_dir: str) -> dict:
         for d in s["lock_docs"]:
             locked += adapt.locked_from_lockyards(d, court_map=cmap)
         occ = adapt.merge_status(booked, locked)
-        # ngay hien thi: uu tien ngay DA CAO (onetime), else days_hint, else union
+        # ngay hien thi: uu tien ngay DA CAO (onetime), else days_hint; luon
+        # loc trong cua so [hom nay .. hom nay + N-1] — file ngay qua giu tren disk
+        # (retention sau) nhung khong hien.
         if s["dates"]:
-            days = sorted(s["dates"])
+            days = sorted(d for d in s["dates"] if d in window)
             keep = set(days)
             occ = [c for c in occ if c["date"] in keep]   # bo cell ngoai cua so
         else:
-            days = s["days_hint"]
+            dh = s["days_hint"] or []
+            days = [d for d in dh if d in window] or dh
         name = adapt.name_from_branch(s["branch_doc"]) or s["branch_name"]
         grid = adapt.build_grid(occ, branch=key, branch_name=name,
                                 days=days, courts_override=court_order or None)
@@ -147,7 +151,10 @@ def load_data(data_dir: str) -> dict:
         grid["court_sport"] = adapt.court_sport_map(s["cores"]) if s["cores"] else {}
         out.append(grid)
     out.sort(key=lambda g: g["branch_name"])
-    return {"branches": out, "count": len(out)}
+    monitored = set(read_config().get("branches", []))
+    for g in out:
+        g["monitored"] = g["branch"] in monitored     # sân đang chọn để cào
+    return {"branches": out, "count": len(out), "monitored": sorted(monitored)}
 
 
 CONFIG_PATH = os.path.join(HERE, "config.json")
@@ -160,7 +167,7 @@ def read_config() -> dict:
         import scheduler
         return scheduler.load_config()
     except Exception:
-        cfg = {"branches": [], "days_ahead": 15}
+        cfg = {"branches": [], "days_window": 21}
         if os.path.exists(CONFIG_PATH):
             try:
                 cfg.update(json.load(open(CONFIG_PATH, encoding="utf-8")))
@@ -169,17 +176,43 @@ def read_config() -> dict:
         return cfg
 
 
-def write_config_branches(branches: list) -> dict:
-    """Ghi lai config.json voi danh sach branches moi (giu cac khoa khac)."""
-    branches = [b.strip() for b in branches if isinstance(b, str) and BRANCH_RE.match(b.strip())]
-    branches = list(dict.fromkeys(branches))  # khu trung lap, giu thu tu
+def write_config(patch: dict) -> dict:
+    """Ghi config.json: chỉ nhận khoá cho phép (branches, days_window). Giữ khoá khác."""
     cfg = {}
     if os.path.exists(CONFIG_PATH):
         cfg = json.load(open(CONFIG_PATH, encoding="utf-8"))
-    cfg["branches"] = branches
+    if "branches" in patch:
+        bs = [b.strip() for b in patch["branches"]
+              if isinstance(b, str) and BRANCH_RE.match(b.strip())]
+        cfg["branches"] = list(dict.fromkeys(bs))   # khử trùng lặp, giữ thứ tự
+    if "days_window" in patch:
+        try:
+            cfg["days_window"] = max(1, min(60, int(patch["days_window"])))
+        except (TypeError, ValueError):
+            raise ValueError("days_window phải là số 1–60")
+        cfg.pop("days_ahead", None)                 # dọn khoá cũ nếu còn
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(cfg, f, ensure_ascii=False, indent=2)
     return cfg
+
+
+def _window_dates() -> set:
+    """Tập ISO date trong cửa sổ [hôm nay .. hôm nay + N-1] theo config."""
+    cfg = read_config()
+    try:
+        import scheduler
+        return {d.isoformat() for d in scheduler.target_dates(cfg)}
+    except Exception:
+        today = dt.date.today()
+        n = int(cfg.get("days_window", cfg.get("days_ahead", 21)) or 21)
+        wd_only = cfg.get("weekdays_only", False)
+        out = set()
+        for i in range(max(1, min(60, n))):
+            d = today + dt.timedelta(days=i)
+            if wd_only and d.weekday() >= 5:
+                continue
+            out.add(d.isoformat())
+        return out
 
 
 def read_directory() -> dict:
@@ -214,7 +247,8 @@ def read_directory() -> dict:
 
 # ---------------------------------------------------------------- crawl control
 LOG_PATH = os.path.join(HERE, "data", "_crawl.log")
-_crawl = {"proc": None, "started": None, "finished": None, "returncode": None, "lock": threading.Lock()}
+_crawl = {"proc": None, "started": None, "started_ts": None, "finished": None,
+          "returncode": None, "lock": threading.Lock()}
 _auto = {"enabled": False, "interval_min": 30, "next_run": None}
 WD_VN = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
 
@@ -232,16 +266,22 @@ def _fmt_age(ts: float) -> str:
     return f"{s // 86400} ngày trước"
 
 
-def crawl_coverage() -> dict:
-    """Với mỗi branch × ngày T2–T6 tới: có file chưa + cào lúc nào (mtime)."""
+def crawl_coverage(started_ts: float | None = None) -> dict:
+    """Với mỗi branch × ngày trong cửa sổ: có file chưa + cào lúc nào (mtime).
+
+    ``started_ts`` = mốc bắt đầu lượt cào gần nhất (nếu có). File mtime >= mốc này
+    được đánh dấu ``fresh`` (vừa cào trong lượt), để phân biệt data cũ vẫn còn.
+    """
     cfg = read_config()
-    today = dt.date.today()
-    dates = []
-    for i in range(1, cfg.get("days_ahead", 15) + 1):
-        d = today + dt.timedelta(days=i)
-        if cfg.get("weekdays_only", True) and d.weekday() >= 5:
-            continue
-        dates.append(d)
+    try:
+        import scheduler
+        dates = scheduler.target_dates(cfg)
+    except Exception:
+        today = dt.date.today()
+        n = int(cfg.get("days_window", cfg.get("days_ahead", 21)) or 21)
+        dates = [today + dt.timedelta(days=i) for i in range(max(1, min(60, n)))
+                 if not (cfg.get("weekdays_only", False)
+                         and (today + dt.timedelta(days=i)).weekday() >= 5)]
     branches = []
     for b in cfg.get("branches", []):
         days = []
@@ -249,22 +289,34 @@ def crawl_coverage() -> dict:
             p = os.path.join(HERE, "data", f"{b}__{d.isoformat()}.json")
             ex = os.path.isfile(p)
             mt = os.path.getmtime(p) if ex else 0
+            fresh = bool(started_ts and ex and mt >= started_ts)
             days.append({"date": d.isoformat(), "weekday": WD_VN[d.weekday()],
-                         "has": ex, "age": _fmt_age(mt), "mtime": mt})
+                         "has": ex, "fresh": fresh, "age": _fmt_age(mt), "mtime": mt})
         aux = {}
         for suffix in ("cores", "locks"):
             p = os.path.join(HERE, "data", f"{b}__{suffix}.json")
             aux[suffix] = {"has": os.path.isfile(p),
                            "age": _fmt_age(os.path.getmtime(p)) if os.path.isfile(p) else "—"}
         have = sum(1 for x in days if x["has"])
+        fresh = sum(1 for x in days if x["fresh"])
         branches.append({"branch": b, "days": days, "aux": aux,
-                         "have": have, "total": len(days)})
+                         "have": have, "fresh": fresh, "total": len(days)})
     # lần cào gần nhất = file data mới nhất
     files = glob.glob(os.path.join(HERE, "data", "*.json"))
     files = [f for f in files if not os.path.basename(f).startswith(("_", "sample_"))]
     newest = max((os.path.getmtime(f) for f in files), default=0)
     return {"branches": branches, "interval_min": cfg.get("interval_min", 30),
+            "days_window": window_size_cfg(cfg), "tracking": started_ts is not None,
+            "started_ts": started_ts,
             "last_data_age": _fmt_age(newest), "last_data_ts": newest}
+
+
+def window_size_cfg(cfg) -> int:
+    try:
+        import scheduler
+        return scheduler.window_size(cfg)
+    except Exception:
+        return int(cfg.get("days_window", cfg.get("days_ahead", 21)) or 21)
 
 
 def crawl_status() -> dict:
@@ -282,7 +334,8 @@ def crawl_status() -> dict:
     except FileNotFoundError:
         pass
     return {"running": running, "started": _crawl["started"], "finished": _crawl["finished"],
-            "returncode": _crawl["returncode"], "log_tail": log, "coverage": crawl_coverage(),
+            "returncode": _crawl["returncode"], "log_tail": log,
+            "coverage": crawl_coverage(_crawl.get("started_ts")),
             "auto": {"enabled": _auto["enabled"], "interval_min": _auto["interval_min"],
                      "next_run": _auto["next_run"]}}
 
@@ -297,7 +350,10 @@ def start_crawl() -> dict:
         _crawl["proc"] = subprocess.Popen(
             [sys.executable, os.path.join(HERE, "scheduler.py"), "--once"],
             cwd=HERE, stdout=logf, stderr=subprocess.STDOUT, env=env)
-        _crawl["started"] = dt.datetime.now().isoformat(timespec="seconds")
+        now = dt.datetime.now()
+        _crawl["started"] = now.isoformat(timespec="seconds")
+        # trừ 1s để file ghi ngay đầu lượt không bị lệch mtime < started_ts
+        _crawl["started_ts"] = now.timestamp() - 1
         _crawl["finished"] = None
         _crawl["returncode"] = None
     return {"ok": True}
@@ -387,11 +443,11 @@ class Handler(BaseHTTPRequestHandler):
         try:
             n = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(n).decode("utf-8")) if n else {}
-            branches = body.get("branches", [])
-            if not isinstance(branches, list):
+            if "branches" in body and not isinstance(body["branches"], list):
                 raise ValueError("branches phải là list")
-            cfg = write_config_branches(branches)
-            self._send(200, json.dumps({"ok": True, "branches": cfg["branches"]},
+            cfg = write_config(body)
+            self._send(200, json.dumps({"ok": True, "branches": cfg.get("branches", []),
+                                        "days_window": cfg.get("days_window")},
                                        ensure_ascii=False).encode("utf-8"),
                        "application/json; charset=utf-8")
         except Exception as e:

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """scheduler.py — lập lịch quét sân (orchestration).
 
-Vòng: mỗi `interval_min` phút, với mỗi branch × mỗi ngày T2–T6 trong `days_ahead`
-ngày tới:  fetch_raw() -> decrypt() -> redact PII -> lưu data/<branch>__<date>.json
+Vòng: mỗi `interval_min` phút, với mỗi branch × mỗi ngày trong `days_window`
+ngày tính từ hôm nay:  fetch_raw() -> decrypt() -> redact PII -> lưu data/<branch>__<date>.json
 Rồi heatmap (server.py) tự đọc.
 
 fetch_raw() và decrypt() là stub DO BẠN VIẾT (fetch_raw.py, decrypt.py). Scheduler
@@ -29,8 +29,8 @@ CONFIG = os.path.join(HERE, "config.json")
 
 DEFAULT_CONFIG = {
     "branches": ["sport_bui_thi_xuan_badminton"],
-    "days_ahead": 15,
-    "weekdays_only": True,
+    "days_window": 21,       # số ngày tính TỪ hôm nay (cào + hiển thị), gồm T7/CN
+    "weekdays_only": False,
     "interval_min": 30,
     "delay_sec": 5,          # >=2s để dưới 30 req/phút
     "fetch_schedule_month": True,
@@ -46,12 +46,23 @@ def load_config() -> dict:
     return cfg
 
 
+def window_size(cfg) -> int:
+    """Số ngày trong cửa sổ (một biến chung cho cào lẫn hiển thị)."""
+    n = cfg.get("days_window", cfg.get("days_ahead", 21))
+    try:
+        return max(1, min(60, int(n)))
+    except (TypeError, ValueError):
+        return 21
+
+
 def target_dates(cfg, today=None) -> list[dt.date]:
+    """Danh sách ngày TỪ hôm nay đến hôm nay + (window-1). Gồm T7/CN trừ khi
+    weekdays_only. Dùng chung cho scheduler (cào) và server (hiển thị)."""
     today = today or dt.date.today()
     out = []
-    for i in range(1, cfg["days_ahead"] + 1):
+    for i in range(0, window_size(cfg)):
         d = today + dt.timedelta(days=i)
-        if cfg["weekdays_only"] and d.weekday() >= 5:
+        if cfg.get("weekdays_only", False) and d.weekday() >= 5:
             continue
         out.append(d)
     return out

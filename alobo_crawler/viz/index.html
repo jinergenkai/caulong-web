@@ -36,6 +36,19 @@
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
     box-shadow:var(--shadow);padding:16px;margin-top:16px;}
   .controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;}
+  .topbar{gap:10px 12px;align-items:center;}
+  #branchPick{flex:1 1 200px;min-width:140px;max-width:360px;}
+  #branchSel{width:100%;min-width:0;font-weight:600;}
+  #viewSeg{flex:0 0 auto;max-width:100%;}
+  .ctxrow{margin-top:10px;padding-top:10px;border-top:1px solid var(--line2);}
+  .ctxrow:empty,.ctxrow.hide{display:none;}
+  .ctxrow select{min-width:0;max-width:44vw;}
+  @media (max-width:640px){
+    #branchPick{flex:1 1 100%;max-width:100%;}
+    #viewSeg{flex-wrap:wrap;}                 /* tab xuống dòng, không giấu tab nào */
+    #viewSeg button{padding:6px 10px;}
+    .ctxrow select{max-width:40vw;}
+  }
   .seg{display:inline-flex;background:var(--line2);border-radius:10px;padding:3px;gap:2px;}
   .seg button{border:0;background:transparent;color:var(--ink2);font:inherit;font-weight:600;
     padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;}
@@ -118,23 +131,22 @@
   <div class="kpis" id="kpis"></div>
 
   <div class="card">
-    <div class="controls">
-      <span id="branchPick" style="display:none">
-        <select id="branchSel"></select>
-      </span>
+    <div class="controls topbar">
+      <span id="branchPick" style="display:none"><select id="branchSel"></select></span>
       <div class="seg" id="viewSeg">
         <button data-v="day" class="on">Theo ngày</button>
         <button data-v="overview">Tổng quan</button>
+        <button data-v="finder">🔍 Tìm slot</button>
         <button data-v="crawl">⟳ Cào dữ liệu</button>
         <button data-v="settings">⚙ Cài đặt sân</button>
       </div>
+    </div>
+    <div class="controls ctxrow" id="ctxRow">
       <span id="sportPick" style="display:none">Môn: <select id="sportSel"></select></span>
       <span id="dayPick" style="display:none">Ngày: <select id="daySel"></select></span>
-      <label class="toggle"><input type="checkbox" id="focusChk" checked> Chỉ 18:00–22:00</label>
+      <span id="rangePick">Giờ: <select id="rangeFrom"></select> – <select id="rangeTo"></select></span>
       <label class="toggle"><input type="checkbox" id="wdChk" checked> Chỉ T2–T6</label>
-      <span id="courtPick" style="display:none">
-        Sân: <select id="courtSel"></select>
-      </span>
+      <span id="courtPick" style="display:none">Sân: <select id="courtSel"></select></span>
     </div>
     <div class="legend" id="legend"></div>
   </div>
@@ -143,6 +155,18 @@
     <div id="board" class="scroll"></div>
     <div id="freePanel"></div>
     <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="card" id="finderCard" hidden>
+    <div style="font-weight:700">Tìm slot theo khung yêu thích</div>
+    <div class="hint" style="margin-top:0">Chọn thứ + khung giờ → liệt kê mọi ngày sắp tới còn sân trống (mọi sân bạn theo dõi), để đặt sớm.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;margin-top:12px">
+      <div><div class="hint" style="margin:0 0 4px">Thứ</div><div id="fDays" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+      <div><div class="hint" style="margin:0 0 4px">Khung giờ</div>
+        <select id="fFrom"></select> – <select id="fTo"></select></div>
+      <label class="toggle" style="align-self:flex-end"><input type="checkbox" id="fAllBranch" checked> Mọi sân đang theo dõi</label>
+    </div>
+    <div id="finderResult" style="margin-top:16px"></div>
   </div>
 
   <div class="card" id="crawlCard" hidden>
@@ -169,6 +193,16 @@
   </div>
 
   <div class="card" id="settingsCard" hidden>
+    <div style="font-weight:700;margin-bottom:2px">Phạm vi ngày</div>
+    <div class="hint" style="margin-top:0">Số ngày tính <b>từ hôm nay</b> để cào &amp; hiển thị (gồm cả T7/CN).
+      Đặt nhỏ để né rate limit / gọn mắt, lớn để nhìn xa. Dùng chung cho cả crawler lẫn view.</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+      <input id="daysWindow" type="number" min="1" max="60" step="1"
+        style="width:90px;font:inherit;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
+      <span class="hint" style="margin:0">ngày</span>
+      <span id="dwMsg" class="hint" style="margin:0"></span>
+    </div>
+    <div style="height:1px;background:var(--line);margin:18px 0"></div>
     <div style="font-weight:700;margin-bottom:2px">Sân đang theo dõi</div>
     <div class="hint" style="margin-top:0">Tick để thêm/bỏ. Bấm “Lưu” ghi vào <code>config.json</code> — scheduler quét đúng danh sách này.</div>
     <div id="dirList" style="margin-top:12px"></div>
@@ -192,7 +226,20 @@
 
 <script>
 const WD_FULL = {T2:"Thứ 2",T3:"Thứ 3",T4:"Thứ 4",T5:"Thứ 5",T6:"Thứ 6",T7:"Thứ 7",CN:"Chủ nhật"};
-let DATA=null, G=null, state={view:"day", date:null, focus:true, wd:true, sport:null};
+let DATA=null, G=null, state={view:"day", date:null, range:{start:"18:00",end:"22:00"}, wd:true, sport:null};
+let FINDER={days:[0,1,2,3,4], start:"18:00", end:"20:00"};   // tìm slot: mặc định T2–T6, 18–20h
+const LS_KEY='alobo_prefs';
+function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  if(p.range&&p.range.start&&p.range.end) state.range=p.range;
+  if(typeof p.wd==='boolean') state.wd=p.wd;
+  if(p.sport) state._sportPref=p.sport;
+  if(p.branch) state._branchPref=p.branch;
+  if(p.finder) FINDER=Object.assign(FINDER, p.finder);
+  if(p.view) state.view=p.view;
+}catch(e){} }
+function savePrefs(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(
+  {range:state.range, wd:state.wd, sport:state.sport, finder:FINDER, view:state.view,
+   branch:(G?G.branch:state._branchPref)})); }catch(e){} }
 const SPORT_LABEL={badminton:"Cầu lông", pickleball:"Pickleball", all:"Tất cả"};
 function courtsInView(){
   if(!state.sport||state.sport==="all") return G.courts;
@@ -206,7 +253,8 @@ function sportsAvailable(){
 const tip = document.getElementById('tip');
 
 function fmtDate(iso){const [y,m,d]=iso.split('-');return `${d}/${m}`;}
-function slotsInView(){ return G.slots.filter(s => !state.focus || (s>="18:00" && s<"22:00")); }
+function slotsInView(){ return G.slots.filter(s => s>=state.range.start && s<state.range.end); }
+function addMinG(t,m){let[a,b]=t.split(':').map(Number);let x=a*60+b+m;return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');}
 function daysInView(){
   const f=G.days.filter(d => !(state.wd && d.is_weekend));
   return f.length ? f : G.days;   // rong (chi cuoi tuan) -> tam hien tat ca
@@ -351,7 +399,7 @@ function renderDay(){
   // dòng giá khung tối (nếu có products)
   const rng=priceRange(courts,date,slots);
   document.getElementById('freePanel').innerHTML = rng
-    ? `<div class="hint" style="margin-top:12px">💵 Giá ${state.focus?'khung 18–22h':'trong ngày'}: <b>${rng}/giờ</b>${rng.includes('–')?' (nhiều mức — hover từng ô)':''}</div>`
+    ? `<div class="hint" style="margin-top:12px">💵 Giá ${state.range.start}–${state.range.end}: <b>${rng}/giờ</b>${rng.includes('–')?' (nhiều mức — hover từng ô)':''}</div>`
     : '';
   document.getElementById('hint').textContent="";
 }
@@ -369,7 +417,7 @@ function renderLegend(){
 }
 
 function renderKpis(){
-  const slots=G.slots.filter(s=>s>="18:00"&&s<"22:00");
+  const rg=state.range, slots=G.slots.filter(s=>s>=rg.start&&s<rg.end);
   const days=G.days.filter(d=>!d.is_weekend);
   let free=0,total=0;
   const CV=courtsInView();
@@ -377,34 +425,109 @@ function renderKpis(){
   const daysWithFree=days.filter(d=>CV.some(ct=>slots.some(s=>statusAt(ct,d.date,s)==="free"))).length;
   const bmp=branchMaxPrice();
   document.getElementById('kpis').innerHTML=`
-    <div class="kpi good"><b>${free}</b><span>ô trống 18–22h (T2–T6)</span></div>
+    <div class="kpi good"><b>${free}</b><span>ô trống ${rg.start}–${rg.end} (T2–T6)</span></div>
     <div class="kpi"><b>${daysWithFree}/${days.length}</b><span>ngày T2–T6 có chỗ</span></div>
     <div class="kpi"><b>${CV.length}</b><span>sân</span></div>`
     + (bmp!=null?`<div class="kpi"><b style="color:var(--accent)">${fmtPrice(bmp)}</b><span>giá trần / giờ</span></div>`
                 : `<div class="kpi"><b>${G.days.length}</b><span>ngày theo dõi</span></div>`);
 }
 
+function timeOptions(){ // các mốc 30' trong giờ hoạt động
+  const h=G.hours||{start:"06:00",end:"22:00"}; const out=[]; let t=h.start;
+  while(t<=h.end){ out.push(t); t=addMinG(t,G.slot_minutes||30); } return out;
+}
+function fillRangeSelects(){
+  const opts=timeOptions();
+  const rf=document.getElementById('rangeFrom'), rt=document.getElementById('rangeTo');
+  if(rf.dataset.b!==G.branch){
+    rf.innerHTML=opts.slice(0,-1).map(t=>`<option>${t}</option>`).join('');
+    rt.innerHTML=opts.slice(1).map(t=>`<option>${t}</option>`).join('');
+    rf.dataset.b=rt.dataset.b=G.branch;
+  }
+  rf.value=state.range.start; rt.value=state.range.end;
+}
 function syncControls(){
   document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
-  document.getElementById('focusChk').checked=state.focus;
   document.getElementById('wdChk').checked=state.wd;
+  if(G) fillRangeSelects();
+}
+
+/* ---------- Tìm slot theo khung yêu thích (đa sân) ---------- */
+const WDX=['T2','T3','T4','T5','T6','T7','CN'];
+function occSetFor(g){ if(!g.__occ){ g.__occ=new Set(g.occupied.map(c=>c.court+'|'+c.date+'|'+c.slot));
+  g.__stat={}; g.occupied.forEach(c=>g.__stat[c.court+'|'+c.date+'|'+c.slot]=c.status); } return g.__occ; }
+function statusG(g,court,date,slot){ occSetFor(g); const k=court+'|'+date+'|'+slot;
+  return g.__occ.has(k)?(g.__stat[k]||'booked'):'free'; }
+function badmintonCourts(g){ const m=g.court_sport||{};
+  const bad=g.courts.filter(c=>(m[c]||'badminton')==='badminton'); return bad.length?bad:g.courts; }
+function renderFinder(){
+  const chips=document.getElementById('fDays');
+  chips.innerHTML=WDX.map((w,i)=>`<button data-d="${i}" style="border:1px solid var(--line);border-radius:8px;padding:5px 11px;font:inherit;font-weight:600;cursor:pointer;background:${FINDER.days.includes(i)?'var(--accent)':'var(--panel)'};color:${FINDER.days.includes(i)?'#fff':'var(--ink2)'}">${w}</button>`).join('');
+  chips.querySelectorAll('button').forEach(b=>b.onclick=()=>{ const d=+b.dataset.d,i=FINDER.days.indexOf(d);
+    if(i<0)FINDER.days.push(d); else FINDER.days.splice(i,1); savePrefs(); renderFinder(); });
+  const opts=timeOptions(), ff=document.getElementById('fFrom'), ft=document.getElementById('fTo');
+  if(!ff.options.length){ ff.innerHTML=opts.slice(0,-1).map(t=>`<option>${t}</option>`).join('');
+    ft.innerHTML=opts.slice(1).map(t=>`<option>${t}</option>`).join(''); }
+  ff.value=FINDER.start; ft.value=FINDER.end;
+  ff.onchange=()=>{FINDER.start=ff.value; savePrefs(); runFinder();};
+  ft.onchange=()=>{FINDER.end=ft.value; savePrefs(); runFinder();};
+  document.getElementById('fAllBranch').onchange=runFinder;
+  runFinder();
+}
+function runFinder(){
+  const all=document.getElementById('fAllBranch').checked;
+  const mon=monitoredSet();
+  const branches=all?DATA.branches.filter(g=>g.branch!=='demo'&&(mon.size?mon.has(g.branch):true)):[G];
+  const found=[];
+  branches.forEach(g=>{
+    const courts=badmintonCourts(g);
+    const slots=g.slots.filter(s=>s>=FINDER.start&&s<FINDER.end);
+    g.days.forEach(d=>{
+      if(!FINDER.days.includes(WDX.indexOf(d.weekday))) return;
+      const freeSlots=slots.filter(s=>courts.some(c=>statusG(g,c,d.date,s)==='free'));
+      if(!freeSlots.length) return;
+      let mx=0; freeSlots.forEach(s=>{const n=courts.filter(c=>statusG(g,c,d.date,s)==='free').length; if(n>mx)mx=n;});
+      found.push({date:d.date, weekday:d.weekday, g, name:g.branch_name, freeSlots, maxFree:mx});
+    });
+  });
+  found.sort((a,b)=> a.date<b.date?-1:a.date>b.date?1:a.name.localeCompare(b.name));
+  let h='', cur='';
+  found.forEach(r=>{
+    if(r.date!==cur){ cur=r.date; h+=`<div style="font-weight:700;margin-top:16px;color:var(--ink)">${WD_FULL[r.weekday]||r.weekday} · ${fmtDate(r.date)}</div>`; }
+    h+=`<div class="finder-row" data-b="${r.g.branch}" data-date="${r.date}" style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;cursor:pointer;padding:4px 0">
+      <span style="min-width:190px;font-weight:600">${r.name}</span>
+      <div class="free-list">${r.freeSlots.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+      <span class="hint" style="margin:0">tối đa ${r.maxFree} sân</span></div>`;
+  });
+  const nDays=[...new Set(found.map(r=>r.date))].length;
+  document.getElementById('finderResult').innerHTML = found.length
+    ? `<div class="hint">Có chỗ trong <b>${nDays}</b> ngày · khung ${FINDER.start}–${FINDER.end}. Bấm một dòng để mở chi tiết ngày.</div>`+h
+    : '<div class="hint">Không có slot trống trong khung đã chọn — thử nới khung giờ hoặc thêm thứ.</div>';
+  document.querySelectorAll('#finderResult .finder-row').forEach(row=>row.onclick=()=>{
+    const i=DATA.branches.findIndex(x=>x.branch===row.dataset.b); selectBranch(i);
+    state.view='day'; state.date=row.dataset.date; state.range={start:FINDER.start,end:FINDER.end};
+    syncControls(); render();
+  });
 }
 
 function render(){
-  const isSettings = state.view==="settings";
-  const isCrawl = state.view==="crawl";
-  const isChart = !isSettings && !isCrawl;
+  savePrefs();
+  const v=state.view;
+  const isChart = v==="day"||v==="overview";
   document.getElementById('mainCard').hidden = !isChart;
-  document.getElementById('settingsCard').hidden = !isSettings;
-  document.getElementById('crawlCard').hidden = !isCrawl;
-  document.getElementById('focusChk').closest('.toggle').style.display = isChart?'':'none';
+  document.getElementById('settingsCard').hidden = v!=="settings";
+  document.getElementById('crawlCard').hidden = v!=="crawl";
+  document.getElementById('finderCard').hidden = v!=="finder";
+  document.getElementById('ctxRow').classList.toggle('hide', !isChart);
+  document.getElementById('rangePick').style.display = isChart?'':'none';
   const hasWeekend = G && G.days.some(d=>d.is_weekend);
   document.getElementById('wdChk').closest('.toggle').style.display =
-    (isChart && state.view==="overview" && hasWeekend)?'':'none';
+    (v==="overview" && hasWeekend)?'':'none';
   document.getElementById('courtPick').style.display='none';
-  document.getElementById('dayPick').style.display = (isChart && state.view==="day")?'':'none';
+  document.getElementById('dayPick').style.display = (v==="day")?'':'none';
+  // thanh chọn sân LUÔN hiện (mọi tab) để không nhảy layout khi đổi tab
   document.getElementById('branchPick').style.display =
-    (isChart && DATA && DATA.branches.length>1)?'':'none';
+    (DATA && visibleBranchIdx().length>1)?'':'none';
   // bộ lọc môn — chỉ hiện khi sân có >1 môn
   const av=G?sportsAvailable():[];
   const sp=document.getElementById('sportPick'), ss=document.getElementById('sportSel');
@@ -418,14 +541,18 @@ function render(){
     ss.value=state.sport;
   } else sp.style.display='none';
   document.getElementById('legend').style.display = isChart?'':'none';
-  if(isSettings){ renderSettings(); return; }
-  if(isCrawl){ renderCrawl(); return; }
+  if(v==="settings"){ renderSettings(); return; }
+  if(v==="crawl"){ renderCrawl(); return; }
+  if(v==="finder"){ renderFinder(); return; }
   renderLegend();
-  if(state.view==="overview") renderOverview(); else renderDay();
+  if(v==="overview") renderOverview(); else renderDay();
 }
 
-let DIR=null;
+let DIR=null, CFG=null;
 function renderSettings(){
+  const dw=document.getElementById('daysWindow');
+  if(CFG===null){ fetch('/api/config').then(r=>r.json()).then(c=>{ CFG=c;
+    dw.value=c.days_window||c.days_ahead||21; }); }
   const box=document.getElementById('dirList');
   if(!DIR){ box.innerHTML='<span class="hint">Đang tải…</span>';
     fetch('/api/directory').then(r=>r.json()).then(d=>{DIR=d; drawDir();}); return; }
@@ -471,18 +598,40 @@ function drawCrawl(s){
   document.getElementById('crawlState').innerHTML=st;
   document.getElementById('crawlLog').textContent=s.log_tail||'(chưa có log)';
 
-  // bảng coverage: branch × ngày
+  // bảng coverage: branch × ngày. Khi có lượt cào (tracking): phân biệt
+  // ô VỪA CÀO (xanh sáng) vs data CŨ chưa cào lại (xám mờ) vs CHƯA CÓ (đỏ).
+  const track=cov.tracking;
+  const freshTot=cov.branches.reduce((n,b)=>n+(b.fresh||0),0);
+  const haveTot=cov.branches.reduce((n,b)=>n+b.have,0);
+  const cellTot=cov.branches.reduce((n,b)=>n+b.total,0);
   let h='';
+  if(track){
+    h+=`<div class="hint" style="margin:0 0 8px">
+      ${s.running?`<b style="color:var(--accent)">Đang cào…</b> `:''}
+      Lượt này đã cập nhật <b style="color:var(--free)">${freshTot}</b>/${cellTot} ô ·
+      <span style="display:inline-flex;gap:12px;vertical-align:middle">
+        <span class="lg"><span class="sw" style="background:var(--free-bg);box-shadow:inset 0 0 0 1.5px var(--free-ring)"></span>vừa cào</span>
+        <span class="lg"><span class="sw" style="background:var(--locked-bg);opacity:.6"></span>data cũ</span>
+        <span class="lg"><span class="sw" style="background:var(--booked-bg)"></span>chưa có</span>
+      </span></div>`;
+  } else {
+    h+=`<div class="hint" style="margin:0 0 8px">${haveTot}/${cellTot} ô có dữ liệu.
+      Bấm “Cào lại ngay” để thấy màu xanh chạy dần theo tiến độ cào.</div>`;
+  }
   cov.branches.forEach(b=>{
-    const pct=b.total?Math.round(100*b.have/b.total):0;
-    h+=`<div style="margin-top:14px"><b>${b.branch}</b> — ${b.have}/${b.total} ngày có dữ liệu
+    const extra = track ? ` · <span style="color:var(--free)">${b.fresh||0} vừa cào</span>` : '';
+    h+=`<div style="margin-top:14px"><b>${b.branch}</b> — ${b.have}/${b.total} ngày có dữ liệu${extra}
         · Khoá: ${b.aux.locks.has?b.aux.locks.age:'chưa'} · Sân(cores): ${b.aux.cores.has?b.aux.cores.age:'chưa'}</div>`;
     h+='<table class="hm" style="margin-top:6px"><tbody><tr>';
     b.days.forEach(d=>{
-      const bg=d.has?'var(--free-bg)':'var(--booked-bg)';
-      const ring=d.has?'box-shadow:inset 0 0 0 1.5px var(--free-ring)':'';
-      h+=`<td title="${d.date} · ${d.has?('cào '+d.age):'chưa có'}" style="width:44px;height:34px;border-radius:6px;
-        text-align:center;font-size:10.5px;background:${bg};${ring};color:var(--ink2)">
+      let bg,ring='',op='';
+      if(!d.has){ bg='var(--booked-bg)'; }                                   // chưa có
+      else if(track && d.fresh){ bg='var(--free-bg)'; ring='box-shadow:inset 0 0 0 1.5px var(--free-ring)'; } // vừa cào
+      else if(track){ bg='var(--locked-bg)'; op='opacity:.55'; }             // data cũ, chưa cào lại
+      else { bg='var(--free-bg)'; ring='box-shadow:inset 0 0 0 1.5px var(--free-ring)'; } // idle: có data
+      const tt=d.has?(track&&d.fresh?'vừa cào '+d.age:'data cũ · cào '+d.age):'chưa có';
+      h+=`<td title="${d.date} · ${tt}" style="width:44px;height:34px;border-radius:6px;
+        text-align:center;font-size:10.5px;background:${bg};${ring};${op};color:var(--ink2)">
         ${d.weekday}<br>${d.date.slice(8)}</td>`;
     });
     h+='</tr></tbody></table>';
@@ -493,7 +642,8 @@ function drawCrawl(s){
   // poll khi đang chạy
   if(s.running && !crawlPoll){ crawlPoll=setInterval(fetchCrawl,2000); }
   if(!s.running && crawlPoll){ clearInterval(crawlPoll); crawlPoll=null;
-    if(DATA){ fetch('/api/data').then(r=>r.json()).then(p=>{p.branches.sort((a,b)=>(a.branch==="demo")-(b.branch==="demo")); DATA=p;}); } }
+    if(DATA) reloadData();   // cào xong: nạp lại data + G để view khác thấy ngay
+  }
 }
 
 function selectBranch(i){
@@ -503,32 +653,57 @@ function selectBranch(i){
   document.getElementById('subtitle').textContent=
     `${G.days.length} ngày · ${G.courts.length} sân · cập nhật ${(new Date()).toLocaleString('vi-VN')}`;
   state.date=null;
-  const av=sportsAvailable();
-  state.sport = av.length>1 ? (av.includes("badminton")?"badminton":av[0]) : "all";
+  const av=sportsAvailable(), pref=state._sportPref;
+  state.sport = av.length<=1 ? "all"
+    : (pref && (pref==="all"||av.includes(pref))) ? pref
+    : (av.includes("badminton")?"badminton":av[0]);
   renderKpis(); syncControls(); render();
 }
 
+function monitoredSet(){ return new Set((DATA&&DATA.monitored)||[]); }
+// chỉ số các sân HIỂN THỊ ở dropdown = sân đang theo dõi (chọn để cào);
+// nếu chưa cấu hình sân nào thì tạm hiện tất cả (trừ demo).
+function visibleBranchIdx(){
+  const mon=monitoredSet();
+  let idx=DATA.branches.map((g,i)=>i).filter(i=>DATA.branches[i].branch!=='demo'
+    && (mon.size? mon.has(DATA.branches[i].branch):true));
+  if(!idx.length) idx=DATA.branches.map((g,i)=>i).filter(i=>DATA.branches[i].branch!=='demo');
+  return idx;
+}
+function fillBranchSelect(){
+  const idx=visibleBranchIdx();
+  document.getElementById('branchSel').innerHTML=
+    idx.map(i=>`<option value="${i}">${DATA.branches[i].branch_name}</option>`).join('');
+  return idx;
+}
+function initialBranchIdx(idx){
+  if(state._branchPref){ const j=DATA.branches.findIndex(g=>g.branch===state._branchPref);
+    if(j>=0 && idx.includes(j)) return j; }   // khôi phục sân đã chọn nếu còn theo dõi
+  return idx[0];
+}
 function boot(payload){
-  // real (khong phai demo) len truoc
-  payload.branches.sort((a,b)=>(a.branch==="demo")-(b.branch==="demo"));
+  loadPrefs();   // khôi phục lựa chọn đã lưu (range, T2–T6, môn, sân, tìm slot, tab)
   DATA=payload;
   if(!payload.branches||!payload.branches.length){
-    document.getElementById('board').innerHTML='<p class="hint">Chưa có dữ liệu. Đặt file get_onetime_bookings đã giải mã vào thư mục <code>data/</code> rồi tải lại.</p>';
+    document.getElementById('board').innerHTML='<p class="hint">Chưa có dữ liệu. Vào tab ⚙ Cài đặt sân chọn sân, rồi bấm ⟳ Cào dữ liệu.</p>';
     document.getElementById('kpis').innerHTML='';
     return;
   }
-  const bp=document.getElementById('branchPick'), bs=document.getElementById('branchSel');
-  if(payload.branches.length>1){
-    bp.style.display=''; bs.innerHTML=payload.branches.map((g,i)=>`<option value="${i}">${g.branch_name}</option>`).join('');
-    bs.onchange=e=>selectBranch(+e.target.value);
-  }
-  selectBranch(0);
+  const idx=fillBranchSelect();
+  document.getElementById('branchSel').onchange=e=>selectBranch(+e.target.value);
+  selectBranch(initialBranchIdx(idx));
 }
 
 // events
 document.getElementById('viewSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
   state.view=b.dataset.v; syncControls(); render(); };
-document.getElementById('focusChk').onchange=e=>{state.focus=e.target.checked; render();};
+function onRangeChange(){
+  let a=document.getElementById('rangeFrom').value, b=document.getElementById('rangeTo').value;
+  if(b<=a) b=addMinG(a, G.slot_minutes||30);   // đảm bảo to > from
+  state.range={start:a,end:b}; renderKpis(); syncControls(); render();
+}
+document.getElementById('rangeFrom').onchange=onRangeChange;
+document.getElementById('rangeTo').onchange=onRangeChange;
 document.getElementById('wdChk').onchange=e=>{state.wd=e.target.checked; render();};
 document.getElementById('daySel').onchange=e=>{state.date=e.target.value; render();};
 document.getElementById('sportSel').onchange=e=>{state.sport=e.target.value; renderKpis(); render();};
@@ -549,13 +724,30 @@ document.getElementById('crawlBtn').onclick=()=>{
 };
 document.getElementById('saveBtn').onclick=()=>{
   const sel=currentSelection(); const msg=document.getElementById('saveMsg');
+  let dw=parseInt(document.getElementById('daysWindow').value,10);
+  if(!(dw>=1&&dw<=60)) dw=21;
   msg.textContent='Đang lưu…';
   fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({branches:sel})}).then(r=>r.json()).then(d=>{
-    msg.textContent = d.ok ? `✓ Đã lưu ${d.branches.length} sân vào config.json. Chạy: python scheduler.py --once`
-                           : ('Lỗi: '+(d.error||'?'));
+    body:JSON.stringify({branches:sel, days_window:dw})}).then(r=>r.json()).then(d=>{
+    if(!d.ok){ msg.textContent='Lỗi: '+(d.error||'?'); return; }
+    CFG=d;
+    msg.textContent=`✓ Đã lưu ${d.branches.length} sân · ${d.days_window} ngày. Đang cập nhật view…`;
+    // horizon đổi → nạp lại dữ liệu để view/coverage áp cửa sổ mới
+    reloadData(()=>{ msg.textContent=`✓ Đã lưu ${d.branches.length} sân · ${d.days_window} ngày. Chạy: python scheduler.py --once`; });
   }).catch(e=>{ msg.textContent='Lỗi: '+e; });
 };
+function reloadData(cb){
+  const keep=G?G.branch:state._branchPref;
+  fetch('/api/data').then(r=>r.json()).then(p=>{
+    DATA=p;
+    if(!p.branches||!p.branches.length){ if(cb)cb(); return; }
+    const idx=fillBranchSelect();
+    let i=keep?p.branches.findIndex(x=>x.branch===keep):-1;
+    if(i<0||!idx.includes(i)) i=idx[0];
+    delete p.branches[i].__occ; selectBranch(i);
+    if(cb)cb();
+  }).catch(()=>{ if(cb)cb(); });
+}
 
 fetch('/api/data').then(r=>r.json()).then(boot).catch(err=>{
   document.getElementById('board').innerHTML='<p class="hint">Không tải được dữ liệu: '+err+'</p>';
