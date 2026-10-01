@@ -119,7 +119,32 @@ vẫn dùng cấu hình cũ — đây là chỗ hay vướng nhất.
 
 ---
 
-## Chạy thử ở máy
+## Sân trống (courts.html)
+
+Cào **theo yêu cầu**: admin bấm ⟳ Cào ngay trên courts.html (chạy `server.py` **không** `--crawl`, không chạy `scheduler.py` dạng vòng lặp). Cào xong server tự đẩy dữ liệu lên; web chỉ đọc. Vercel giữ **cửa sổ hiện tại**
+(hôm nay → +N ngày), lịch sử nằm trên server, tự xoá file cũ hơn 90 ngày.
+
+```
+server bạn ──(cào xong, POST + token)──▶ /api/courts ──▶ courts.html (ai cũng xem)
+admin bấm "⟳ Cào ngay" ──▶ /api/courts?action=crawl ──(token)──▶ server bạn /api/crawl/run
+```
+
+Cấu hình, **một token dùng chung**:
+
+| Ở đâu | Biến | Giá trị |
+|---|---|---|
+| Vercel | `CRAWLER_TOKEN` | chuỗi ngẫu nhiên dài |
+| Vercel | `CRAWLER_TRIGGER_URL` | `http://<IP server>:8000/api/crawl/run` (chỉ cần nếu muốn nút Cào ngay) |
+| `alobo_crawler/.env` | `PUSH_URL` | `https://<project>.vercel.app/api/courts` |
+| `alobo_crawler/.env` | `PUSH_TOKEN` | giống `CRAWLER_TOKEN` |
+
+Muốn nút Cào ngay: chạy `python server.py --host 0.0.0.0` và mở cổng 8000. Từ internet chỉ
+gọi được đúng `POST /api/crawl/run`, phải có token, cách nhau tối thiểu 2 phút; đổi danh sách
+sân vẫn chỉ làm được từ máy nhà/LAN/Tailscale.
+
+Sửa giao diện heatmap: sửa `alobo_crawler/viz/index.html` rồi chạy
+`python alobo_crawler/make_courts_page.py` — **đừng sửa tay `courts.html`**.
+
 
 ```bash
 node dev-server.mjs

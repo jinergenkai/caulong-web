@@ -16,6 +16,7 @@ scheduler chạy **DRY-RUN**: in đúng những call SẼ thực hiện rồi d�
 from __future__ import annotations
 
 import argparse
+import re
 import datetime as dt
 import json
 import os
@@ -157,6 +158,50 @@ def run_pass(cfg, dry=False) -> None:
         time.sleep(cfg["delay_sec"])   # tôn trọng rate limit
     print(f"[{dt.datetime.now():%H:%M:%S}] Xong: {done} ok, {fail} lỗi. "
           f"Mở heatmap: python server.py")
+    try:
+        n = prune_old(int(cfg.get("retention_days", RETENTION_DAYS)))
+        if n:
+            print(f"   [dọn] xoá {n} file cũ hơn {cfg.get('retention_days', RETENTION_DAYS)} ngày")
+    except Exception as e:
+        print(f"   [dọn] ✗ {e}")
+    # đẩy lên web (webhook). Lỗi gì cũng chỉ in cảnh báo, không làm hỏng lượt cào.
+    if done:
+        try:
+            import push_web
+            push_web.push()
+        except Exception as e:
+            print(f"   [push] ✗ {e}")
+
+
+RETENTION_DAYS = 90          # giữ lịch sử 3 tháng trên server; web chỉ nhận cửa sổ hiện tại
+_DAY_FILE = re.compile(r"__(\d{4}-\d{2}-\d{2})\.json$")
+_MONTH_FILE = re.compile(r"__schedule_(\d{4})-(\d{2})\.json$")
+
+
+def prune_old(days: int = RETENTION_DAYS, today=None) -> int:
+    """Xoá file booking của những ngày cũ hơn `days` ngày.
+    Chỉ đụng 2 loại tên: <branch>__YYYY-MM-DD.json và <branch>__schedule_YYYY-MM.json
+    (tháng bị xoá khi NGÀY CUỐI tháng đã quá hạn). File sân/giá/khoá không bao giờ bị xoá."""
+    cutoff = (today or dt.date.today()) - dt.timedelta(days=days)
+    n = 0
+    for name in os.listdir(DATA) if os.path.isdir(DATA) else []:
+        m = _DAY_FILE.search(name)
+        try:
+            if m:
+                old = dt.date.fromisoformat(m.group(1)) < cutoff
+            else:
+                mm = _MONTH_FILE.search(name)
+                if not mm:
+                    continue
+                y, mo = int(mm.group(1)), int(mm.group(2))
+                last = dt.date(y + (mo == 12), mo % 12 + 1, 1) - dt.timedelta(days=1)
+                old = last < cutoff
+        except ValueError:
+            continue
+        if old:
+            os.remove(os.path.join(DATA, name))
+            n += 1
+    return n
 
 
 def adapt_redact(data):

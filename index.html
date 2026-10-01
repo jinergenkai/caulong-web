@@ -222,6 +222,14 @@ const esc=t=>(t==null?"":String(t)).replace(/&/g,"&amp;").replace(/</g,"&lt;")
 const round1=x=>Math.round(x*10)/10;
 const numStr=x=>{ const r=round1(x)+0; return Number.isInteger(r)?String(r):r.toFixed(1); };
 const fmt=x=>numStr(x)+"k";
+const wStr=x=>{ const r=Math.round((+x||0)*100)/100+0; return String(r); };
+/* Đọc hệ số người dùng gõ: chấp nhận "1,5" lẫn "1.5". Trả null nếu không hợp lệ. */
+const W_MAX=20;
+function parseWeight(t){
+  const v=Number(String(t).trim().replace(",","."));
+  if(String(t).trim()===""||!isFinite(v)||v<0||v>W_MAX) return null;
+  return Math.round(v*100)/100;
+}
 const vnd=x=>Math.round(x*1000).toLocaleString("vi-VN")+" đ";
 /* bỏ dấu để gõ "hung" vẫn tìm ra "Hùng" */
 const norm=s=>String(s||"").toLowerCase().normalize("NFD")
@@ -301,7 +309,7 @@ const orderedSessions=()=>st.sessions.slice().reverse();
 function whenLabel(v){ if(!v||v===LEGACY)return""; const d=new Date(v); return isNaN(d)?"":d.getDate()+"/"+(d.getMonth()+1); }
 function dupTag(m){ const same=st.members.filter(x=>x.name===m.name); return same.length<2?"":" #"+(same.indexOf(m)+1); }
 const fullName=m=>m.name+dupTag(m);
-function initials(n){ const w=String(n||"").trim().split(/\s+/).filter(Boolean);
+function initials(n){ const w=String(n||"").replace(/[^\p{L}\p{N}\s]/gu," ").trim().split(/\s+/).filter(Boolean);
   return !w.length?"?":(w.length>1?w[w.length-2][0]+w[w.length-1][0]:w[0].slice(0,2)).toUpperCase(); }
 function hue(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))%360; return `hsl(${h} 42% 52%)`; }
 function avatarHTML(m,size){
@@ -317,7 +325,7 @@ function payRef(m){ return ("CAULONG "+norm(m.name).replace(/[^a-z0-9]+/g," ").t
    ══════════════════════════════════════════════════════════════════ */
 let st=null, rev=0, updatedAt=null;
 let online=true, loadErr="", fromCache=false;
-let isAdmin=false, pass="";
+let isAdmin=false, pass="", previewing=false;
 
 function readCache(){
   try{ const raw=localStorage.getItem(CACHE_KEY); if(!raw)return null; return JSON.parse(raw); }catch(e){ return null; }
@@ -351,7 +359,7 @@ async function boot(){
     const j=await r.json();
     /* Có thay đổi chưa lưu từ lần trước (mạng hỏng / server lỗi) mà bản trên web lại khác:
        không được im lặng đè lên — đưa cho người dùng chọn. */
-    if(unsaved&&isAdmin&&JSON.stringify(j.data)!==JSON.stringify(st)){
+    if(unsaved&&pass&&JSON.stringify(j.data)!==JSON.stringify(st)){
       online=true; loadErr=""; fromCache=false; dirty=true; render();
       return conflictDialog({rev:j.rev||0,updatedAt:j.updatedAt||null,data:j.data});
     }
@@ -382,7 +390,7 @@ function logAdd(msg){
 const act=msg=>{ logAdd(msg); touch(); };   // ghi nhật ký rồi lưu
 function schedulePush(ms){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>push(),ms||SAVE_DELAY); }
 async function push(forceRev){
-  if(!isAdmin) return;
+  if(!pass) return;          // không phụ thuộc isAdmin: đang "Xem thử" vẫn phải lưu nốt
   if(saving) return;                          // đang gửi; xong sẽ tự kiểm lại localSeq
   clearTimeout(saveTimer);
   saving=true; saveErr=""; renderSaveBar();
@@ -459,7 +467,7 @@ function conflictDialog(server){
   };
   document.getElementById("cf-force").onclick=()=>{ overlay(""); push(server?server.rev:rev); };
 }
-window.addEventListener("beforeunload",e=>{ if(isAdmin&&dirty){ e.preventDefault(); e.returnValue=""; } });
+window.addEventListener("beforeunload",e=>{ if(pass&&dirty){ e.preventDefault(); e.returnValue=""; } });
 
 /* ══════════════════════════════════════════════════════════════════
    3. KHUNG — tab, thanh trạng thái, toast, modal
@@ -502,7 +510,7 @@ function renderStamp(){
 }
 function renderSaveBar(){
   document.querySelectorAll(".savebar").forEach(x=>x.remove());
-  if(!isAdmin) return;
+  if(!pass) return;
   let cls="",dot="",txt="";
   if(saveErr){ cls=" err"; dot=" bad";
     txt="Lưu lỗi: "+saveErr+(retries&&retries<MAX_RETRY?` (đang thử lại lần ${retries}…)`:""); }
@@ -518,13 +526,14 @@ function renderTabs(){
   const el=document.getElementById("tabs");
   const defs=isAdmin
     ? [["sessions","Buổi chơi"],["members","Thành viên"],["collect","Thu tiền"],["view","Xem thử"]]
-    : [["me","Của tôi"],["all","Cả nhóm"],["sessions","Các buổi"]];
+    : [["me","Của tôi"],["all","Cả nhóm"],["sessions","Các buổi"],["courts","Sân trống"]];
   el.innerHTML=defs.map(([k,label])=>{
     const on=isAdmin?(adminTab===k):(view===k);
     return `<button class="tab ${on?"active":""}" data-t="${k}">${label}</button>`;
   }).join("");
   el.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
-    if(isAdmin){ if(b.dataset.t==="view"){ isAdmin=false; view="all"; } else adminTab=b.dataset.t; }
+    if(b.dataset.t==="courts"){ location.href="courts.html"; return; }   // trang riêng, tách khỏi sổ
+    if(isAdmin){ if(b.dataset.t==="view"){ isAdmin=false; previewing=true; picTarget=null; view="all"; } else adminTab=b.dataset.t; }
     else view=b.dataset.t;
     render(); window.scrollTo({top:0});
   });
@@ -542,7 +551,12 @@ function render(){
       fromCache?". Đang xem số liệu đã lưu trong máy.":"."}</div>`;
   }
   else if(fromCache) banner=`<div class="banner off">Đang tải số mới nhất…</div>`;
+  if(previewing&&pass) banner=`<div class="banner off" style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1">👁 Đang xem thử như người xem</span>
+      <button class="ghost mini" id="pv-back">← Về quản trị</button></div>`+banner;
   app.innerHTML=banner+`<div id="body"></div>`;
+  const pv=document.getElementById("pv-back");
+  if(pv) pv.onclick=backToAdmin;
   const body=document.getElementById("body");
   if(isAdmin){
     if(adminTab==="sessions") adminSessions(body);
@@ -555,17 +569,18 @@ function render(){
   }
   renderFoot();
 }
+function backToAdmin(){ isAdmin=true; previewing=false; render(); window.scrollTo({top:0}); }
 function renderFoot(){
   const f=document.getElementById("foot");
   f.innerHTML=isAdmin
     ? `<button class="link" id="f-exit">Thoát quản trị</button>`
-    : `<button class="link muted" id="f-admin" style="color:var(--soft)">Quản trị</button>`;
+    : `<button class="link muted" id="f-admin" style="color:var(--soft)">${pass?"← Về quản trị":"Quản trị"}</button>`;
   const a=document.getElementById("f-admin");
-  if(a) a.onclick=loginDialog;
+  if(a) a.onclick=pass?backToAdmin:loginDialog;   // đã có mật khẩu trong máy thì khỏi nhập lại
   const x=document.getElementById("f-exit");
   if(x) x.onclick=()=>{
     if(dirty&&!confirm("Còn thay đổi chưa lưu. Thoát luôn?")) return;
-    isAdmin=false; pass=""; try{localStorage.removeItem(PASS_KEY);}catch(e){}
+    isAdmin=false; previewing=false; pass=""; try{localStorage.removeItem(PASS_KEY);}catch(e){}
     view="all"; render();
   };
 }
@@ -584,7 +599,7 @@ function loginDialog(){
       const r=await fetch("api/data",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({pass:inp.value,check:1})});
       if(!r.ok){ err.textContent=(await r.json().catch(()=>({}))).error||"Sai mật khẩu."; return; }
-      pass=inp.value; isAdmin=true;
+      pass=inp.value; isAdmin=true; previewing=false;
       try{ localStorage.setItem(PASS_KEY,pass); }catch(e){}
       overlay(""); adminTab="sessions";
       try{ await fetchData(); }catch(e){}       // lấy bản mới nhất trước khi sửa
@@ -633,8 +648,8 @@ function viewMe(root){
       <div class="row" style="align-items:flex-start;gap:10px">${sessionPhoto(s,42)}
         <div style="flex:1;min-width:0">
       <div class="between"><b>${esc(s.date||"—")}</b><b class="num due">${fmt(shareIn(s,m.id))}</b></div>
-      <div class="small muted num" style="margin-top:2px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${numStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất${
-        (s.parts.find(p=>p.mid===m.id)||{}).weight!==1?` × ${numStr((s.parts.find(p=>p.mid===m.id)||{}).weight)} suất của bạn`:""}</div>
+      <div class="small muted num" style="margin-top:2px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${wStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất${
+        (s.parts.find(p=>p.mid===m.id)||{}).weight!==1?` × ${wStr((s.parts.find(p=>p.mid===m.id)||{}).weight)} suất của bạn`:""}</div>
         </div></div>
     </div>`).join("")||`<div class="card"><div class="empty">Không có buổi nào đang nợ.</div></div>`;
 
@@ -749,7 +764,7 @@ function viewSessions(root){
               <span class="muted small"> · ${s.parts.length} người</span></div>
             <div class="num b">${fmt(tot)}</div></div></div>
         </div>
-        <div class="small muted num" style="margin-top:3px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${numStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất</div>
+        <div class="small muted num" style="margin-top:3px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${wStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất</div>
         <div class="bar"><i style="width:${tot>EPS?Math.round(got/tot*100):0}%"></i></div>
         <div class="small">${settled?`<span class="ok b">✓ Đã thu đủ</span>`
           :`Đã thu <b class="num">${fmt(got)}</b> / ${fmt(tot)} · còn <b class="due">${sUnpaid(s).length} người</b>`}</div>
@@ -757,7 +772,7 @@ function viewSessions(root){
           const m=memById(p.mid); if(!m) return "";
           const on=isPaid(s,p.mid);
           return `<span class="chip ${on?"on":""} ${p.mid===me?"me":""}">${avatarHTML(m,18)}${on?'<span class="tick">✓</span>':""}<span class="nm2">${esc(fullName(m))}</span>${
-            p.weight!==1?`<span class="pill">×${numStr(p.weight)}</span>`:""}</span>`;
+            p.weight!==1?`<span class="pill">×${wStr(p.weight)}</span>`:""}</span>`;
         }).join("")}</div>
       </div>`;
     }).join("")||`<div class="card"><div class="empty">Chưa có buổi nào.</div></div>`;
@@ -805,11 +820,11 @@ function drawAvatar(x,img,m,ax,ay,d){
     x.fillText(initials(m.name),ax+d/2,ay+d/2+1); }
   x.restore(); x.textAlign="left"; x.textBaseline="alphabetic";
 }
-function mkCanvas(h){
-  const c=document.createElement("canvas");
-  c.width=IMG_W*S; c.height=Math.round(h)*S;
+function mkCanvas(h,w){
+  const W=w||IMG_W, c=document.createElement("canvas");
+  c.width=W*S; c.height=Math.round(h)*S;
   const x=c.getContext("2d"); x.scale(S,S);
-  x.fillStyle=C.paper; x.fillRect(0,0,IMG_W,h);
+  x.fillStyle=C.paper; x.fillRect(0,0,W,h);
   return {c,x};
 }
 /* Cấp dư chiều cao rồi cắt đúng phần đã vẽ — khỏi phải tính chiều cao bằng tay,
@@ -820,69 +835,157 @@ function cropTo(c,h){
   out.getContext("2d").drawImage(c,0,0);
   return out;
 }
-function stampLine(x,y){
+function stampLine(x,y,w){
   x.fillStyle=C.soft; x.font=F(400,22); x.textAlign="center";
   const t=updatedAt?new Date(updatedAt).toLocaleString("vi-VN",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";
-  x.fillText("Số liệu cập nhật lúc "+t+" · nếu bạn vừa chuyển thì đợi ghi nhận nhé",IMG_W/2,y);
+  x.fillText("Số liệu cập nhật lúc "+t+" · nếu bạn vừa chuyển thì đợi ghi nhận nhé",(w||IMG_W)/2,y);
   x.textAlign="left";
 }
 
-async function exportPersonImage(m){
-  const dueSes=memberDueSessions(m.id), due=memberDue(m.id), paidSum=memberPaidSum(m.id);
-  const P=56, hasQR=!!st.qr&&due>EPS;
-  const {c,x}=mkCanvas(760+dueSes.length*110+(st.note?60:0)+(hasQR?360:0));
-  const [av,qr]=await Promise.all([m.av?loadImg(m.av):null, hasQR?loadImg(st.qr):null]);
+/* Ảnh hoá đơn — 1 người, hoặc gộp nhiều người (một người trả hộ cả nhóm).
+   Mỗi buổi: ảnh buổi (nếu có) · ngày + công thức · dãy avatar ai chơi hôm đó · số tiền.
+   Khổ ngang 1400 cho đủ chỗ dãy avatar. */
+const BILL_W=1400;
+function drawCover(x,img,dx,dy,dw,dh,r){            // ảnh lấp đầy khung, cắt phần thừa
+  const k=Math.max(dw/img.width,dh/img.height), sw=dw/k, sh=dh/k;
+  x.save(); rrect(x,dx,dy,dw,dh,r); x.clip();
+  x.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,dx,dy,dw,dh);
+  x.restore();
+}
+function groupRef(ms){
+  if(ms.length===1) return payRef(ms[0]);
+  return ("CAULONG "+ms.map(m=>norm(m.name).replace(/[^a-z0-9]+/g," ").trim().toUpperCase()).join(" ")).slice(0,40);
+}
+async function exportPersonImage(m){ return exportBillImage([m]); }
+async function exportBillImage(list){
+  const W=BILL_W, P=60, ms=list.filter(Boolean);
+  if(!ms.length) return;
+  const group=ms.length>1;
+  const per=ms.map(m=>({m,ses:memberDueSessions(m.id),due:memberDue(m.id),paid:memberPaidSum(m.id)}))
+    .filter(r=>!group||r.due>EPS);
+  if(!per.length) return toast("Những người đã chọn không còn nợ buổi nào.");
+  const due=per.reduce((a,r)=>a+r.due,0);
+  const nRows=per.reduce((a,r)=>a+r.ses.length,0);
+  const hasQR=!!st.qr&&due>EPS;
+  const {c,x}=mkCanvas(900+nRows*160+per.length*120+(hasQR?640:0),W);
+
+  // nạp trước mọi ảnh cần vẽ: avatar người trong các buổi + ảnh buổi + QR
+  const need=new Map(), photos=new Map();
+  per.forEach(r=>{ need.set(r.m.id,r.m);
+    r.ses.forEach(s2=>{ s2.parts.forEach(p=>{ const mm=memById(p.mid); if(mm) need.set(mm.id,mm); });
+      if(s2.photo) photos.set(s2.id,s2.photo); }); });
+  const avImg=new Map(), phImg=new Map();
+  await Promise.all([
+    ...[...need.values()].map(async mm=>{ if(mm.av) avImg.set(mm.id,await loadImg(mm.av)); }),
+    ...[...photos].map(async([k,v])=>{ phImg.set(k,await loadImg(v)); })]);
+  const qr=hasQR?await loadImg(st.qr):null;
   let y=P;
 
-  drawAvatar(x,av,m,P,y,110);
-  x.fillStyle=C.ink; x.font=F(700,44);
-  x.fillText(clipText(x,fullName(m),IMG_W-P*2-140),P+140,y+52);
-  x.fillStyle=C.soft; x.font=F(400,26);
-  x.fillText(memberSessions(m.id).length+" buổi đã chơi",P+140,y+92);
-  y+=150;
-
-  x.fillStyle=C.line; x.fillRect(P,y,IMG_W-P*2,2); y+=30;
-
-  rrect(x,P,y,IMG_W-P*2,150,20);
-  x.fillStyle=due>EPS?C.amberT:C.tint; x.fill();
-  x.textAlign="center";
-  x.fillStyle=C.soft; x.font=F(700,24); x.fillText(due>EPS?"CẦN CHUYỂN":"TÌNH TRẠNG",IMG_W/2,y+44);
-  x.fillStyle=due>EPS?C.amber:C.court; x.font=FM(800,due>EPS?76:52);
-  x.fillText(due>EPS?fmt(due):"Đã trả đủ ✓",IMG_W/2,y+112);
-  if(due>EPS){ x.fillStyle=C.soft; x.font=FM(400,24); x.fillText(vnd(due),IMG_W/2,y+142); }
-  x.textAlign="left"; y+=170+34;
-
-  if(dueSes.length){
-    x.fillStyle=C.soft; x.font=F(700,24); x.fillText("CÁC BUỔI CHƯA TRẢ",P,y); y+=46;
-    dueSes.forEach(s=>{
-      rrect(x,P,y,IMG_W-P*2,88,14); x.fillStyle=C.card; x.fill();
-      x.strokeStyle=C.line; x.lineWidth=1.5; x.stroke();
-      x.fillStyle=C.ink; x.font=F(700,30); x.fillText(s.date||"—",P+22,y+38);
-      x.fillStyle=C.soft; x.font=FM(400,22);
-      const w=(s.parts.find(p=>p.mid===m.id)||{}).weight;
-      x.fillText(clipText(x,`(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${numStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất`+(w!==1?` × ${numStr(w)}`:""),IMG_W-P*2-260),P+22,y+70);
-      x.textAlign="right"; x.fillStyle=C.amber; x.font=FM(700,34);
-      x.fillText(fmt(shareIn(s,m.id)),IMG_W-P-22,y+54); x.textAlign="left";
-      y+=104;
+  // --- đầu ảnh ---
+  if(!group){
+    const m=per[0].m;
+    drawAvatar(x,avImg.get(m.id),m,P,y,120);
+    x.fillStyle=C.ink; x.font=F(700,48); x.fillText(clipText(x,fullName(m),W-P*2-160),P+150,y+58);
+    x.fillStyle=C.soft; x.font=F(400,27); x.fillText(memberSessions(m.id).length+" buổi đã chơi",P+150,y+100);
+    y+=160;
+  } else {
+    const shownHead=per.slice(0,8);
+    shownHead.forEach((r,i)=>{
+      x.beginPath(); x.arc(P+i*62+45,y+45,48,0,Math.PI*2); x.fillStyle=C.paper; x.fill();
+      drawAvatar(x,avImg.get(r.m.id),r.m,P+i*62,y,90);
     });
-  } else { x.fillStyle=C.soft; x.font=F(400,28); x.textAlign="center";
-    x.fillText("Không còn buổi nào đang nợ 🎉",IMG_W/2,y+40); x.textAlign="left"; y+=70; }
+    const tx=P+(shownHead.length-1)*62+120;
+    x.fillStyle=C.ink; x.font=F(700,44); x.fillText(`Hoá đơn gộp · ${per.length} người`,tx,y+44);
+    x.fillStyle=C.soft; x.font=F(400,26);
+    x.fillText(clipText(x,per.map(r=>fullName(r.m)).join(" + "),W-tx-P),tx,y+82);
+    y+=130;
+  }
+  x.fillStyle=C.line; x.fillRect(P,y,W-P*2,2); y+=30;
 
-  if(paidSum>EPS){ x.fillStyle=C.court; x.font=F(600,24);
-    x.fillText("✓ Đã trả trước đó "+fmt(paidSum)+" ("+memberSessions(m.id).filter(s=>isPaid(s,m.id)).length+" buổi)",P,y+34); y+=60; }
+  // --- số tiền lớn ---
+  rrect(x,P,y,W-P*2,160,22); x.fillStyle=due>EPS?C.amberT:C.tint; x.fill();
+  x.textAlign="center";
+  x.fillStyle=C.soft; x.font=F(700,25);
+  x.fillText(due>EPS?(group?`TỔNG CẦN CHUYỂN (${per.length} NGƯỜI)`:"CẦN CHUYỂN"):"TÌNH TRẠNG",W/2,y+46);
+  x.fillStyle=due>EPS?C.amber:C.court; x.font=FM(800,due>EPS?80:54);
+  x.fillText(due>EPS?fmt(due):"Đã trả đủ ✓",W/2,y+118);
+  if(due>EPS){ x.fillStyle=C.soft; x.font=FM(400,25); x.fillText(vnd(due),W/2,y+150); }
+  x.textAlign="left"; y+=200;
 
+  // --- từng người / từng buổi ---
+  const ROW=136, PH=104, AV=40, STEP=30, AMT_W=190, STRIP_MAX=440;
+  per.forEach(r=>{
+    if(group){
+      drawAvatar(x,avImg.get(r.m.id),r.m,P,y-10,50);
+      x.fillStyle=C.ink; x.font=F(700,32); x.fillText(fullName(r.m),P+64,y+26);
+      x.fillStyle=C.soft; x.font=F(400,22); x.fillText(`${r.ses.length} buổi chưa trả`,P+64,y+56);
+      x.textAlign="right"; x.fillStyle=C.amber; x.font=FM(800,36); x.fillText(fmt(r.due),W-P-24,y+34); x.textAlign="left";
+      y+=84;
+    } else if(r.ses.length){
+      x.fillStyle=C.soft; x.font=F(700,25); x.fillText("CÁC BUỔI CHƯA TRẢ",P,y); y+=26;
+    }
+    r.ses.forEach(s2=>{
+      rrect(x,P,y,W-P*2,ROW,16); x.fillStyle=C.card; x.fill(); x.strokeStyle=C.line; x.lineWidth=1.5; x.stroke();
+      let tx=P+24;
+      const ph=phImg.get(s2.id);
+      if(ph){ drawCover(x,ph,P+16,y+16,PH,PH,12); tx=P+16+PH+22; }
+
+      // dãy avatar bên phải: ai chơi hôm đó; người đang tính tiền có viền cam và luôn có mặt
+      const parts=s2.parts.map(p=>memById(p.mid)).filter(Boolean);
+      const meIdx=parts.findIndex(mm=>mm.id===r.m.id);
+      if(meIdx>0){ parts.unshift(parts.splice(meIdx,1)[0]); }
+      const maxN=Math.max(1,Math.floor((STRIP_MAX-AV)/STEP)+1);
+      const shown=parts.length>maxN?parts.slice(0,maxN-1):parts, more=parts.length-shown.length;
+      const cnt=shown.length+(more?1:0), stripW=AV+(cnt-1)*STEP;
+      const stripR=W-P-24-AMT_W, sx=stripR-stripW, sy=y+28;
+      shown.forEach((mm,i)=>{
+        const ax=sx+i*STEP;
+        x.beginPath(); x.arc(ax+AV/2,sy+AV/2,AV/2+3,0,Math.PI*2);
+        x.fillStyle=mm.id===r.m.id?C.amber:C.card; x.fill();
+        drawAvatar(x,avImg.get(mm.id),mm,ax,sy,AV);
+      });
+      if(more){ const ax=sx+shown.length*STEP;
+        x.beginPath(); x.arc(ax+AV/2,sy+AV/2,AV/2+3,0,Math.PI*2); x.fillStyle=C.card; x.fill();
+        x.beginPath(); x.arc(ax+AV/2,sy+AV/2,AV/2,0,Math.PI*2); x.fillStyle=C.tint; x.fill();
+        x.fillStyle=C.court; x.font=F(700,15); x.textAlign="center";
+        x.fillText("+"+more,ax+AV/2,sy+AV/2+5); x.textAlign="left"; }
+      x.fillStyle=C.soft; x.font=F(400,20); x.textAlign="right";
+      x.fillText(parts.length+" người chơi",stripR,sy+AV+32); x.textAlign="left";
+
+      // chữ bên trái
+      const textW=sx-tx-24;
+      x.fillStyle=C.ink; x.font=F(700,32); x.fillText(clipText(x,s2.date||"—",textW),tx,y+54);
+      x.fillStyle=C.soft; x.font=FM(400,22);
+      x.fillText(clipText(x,`(${s2.court} + ${s2.shuttles}×${s2.price||DEFAULT_PRICE}) / ${wStr(sWeight(s2))} suất = ${fmt(sPerUnit(s2))}/suất`,textW),tx,y+90);
+      const w=(s2.parts.find(p=>p.mid===r.m.id)||{}).weight;
+      if(w!==1){ x.fillStyle=C.amber; x.font=F(600,21);
+        x.fillText(clipText(x,`× ${wStr(w)} suất`+(w>1?" (gồm người đi cùng)":""),textW),tx,y+120); }
+
+      // số tiền
+      x.textAlign="right"; x.fillStyle=C.amber; x.font=FM(700,38);
+      x.fillText(fmt(shareIn(s2,r.m.id)),W-P-24,y+ROW/2+13); x.textAlign="left";
+      y+=ROW+14;
+    });
+    if(!group&&!r.ses.length){ x.fillStyle=C.soft; x.font=F(400,29); x.textAlign="center";
+      x.fillText("Không còn buổi nào đang nợ 🎉",W/2,y+40); x.textAlign="left"; y+=70; }
+    if(r.paid>EPS){ x.fillStyle=C.court; x.font=F(600,24);
+      x.fillText("✓ Đã trả trước đó "+fmt(r.paid)+" ("+memberSessions(r.m.id).filter(s2=>isPaid(s2,r.m.id)).length+" buổi)",P,y+24); y+=44; }
+    if(group) y+=30;
+  });
+
+  // --- chuyển khoản ---
   if(due>EPS){
-    y+=24;
-    x.fillStyle=C.soft; x.font=F(700,24); x.textAlign="center";
-    x.fillText("NỘI DUNG CHUYỂN KHOẢN",IMG_W/2,y);
-    x.fillStyle=C.ink; x.font=FM(700,30); x.fillText(payRef(m),IMG_W/2,y+40); y+=64;
-    if(st.note){ x.fillStyle=C.ink; x.font=F(600,28); x.fillText(clipText(x,st.note,IMG_W-P*2),IMG_W/2,y+30); y+=44; }
-    if(qr){ const d=300; x.drawImage(qr,(IMG_W-d)/2,y+10,d,d); y+=330; }
+    y+=30; x.textAlign="center";
+    x.fillStyle=C.soft; x.font=F(700,25); x.fillText("NỘI DUNG CHUYỂN KHOẢN",W/2,y);
+    x.fillStyle=C.ink; x.font=FM(700,32); x.fillText(groupRef(per.map(r=>r.m)),W/2,y+44); y+=70;
+    if(st.note){ x.fillStyle=C.ink; x.font=F(600,30); x.fillText(clipText(x,st.note,W-P*2),W/2,y+30); y+=48; }
+    if(qr){ const d=340; x.drawImage(qr,(W-d)/2,y+10,d,d*qr.height/qr.width); y+=d*qr.height/qr.width+30; }
     x.textAlign="left";
   } else y+=40;
 
-  stampLine(x,y+34);
-  showImage(cropTo(c,y+58),"caulong-"+norm(m.name).replace(/\s+/g,"-")+".png");
+  stampLine(x,y+34,W);
+  const name=group?"hoa-don-gop-"+per.length+"-nguoi":norm(per[0].m.name).replace(/\s+/g,"-");
+  showImage(cropTo(c,y+60),"caulong-"+name+".png");
 }
 
 async function exportBoardImage(){
@@ -890,7 +993,7 @@ async function exportBoardImage(){
     .sort((a,b)=>b.due-a.due);
   const due=totalDue(), got=totalCollected(), all=due+got;
   const P=56, hasQR=!!st.qr;
-  const {c,x}=mkCanvas(620+rows.length*100+(st.note?60:0)+(hasQR?360:0));
+  const {c,x}=mkCanvas(620+rows.length*100+(st.note?60:0)+(hasQR?600:0));
   const avs=await Promise.all(rows.map(r=>r.m.av?loadImg(r.m.av):Promise.resolve(null)));
   const qr=hasQR?await loadImg(st.qr):null;
   let y=P;
@@ -925,7 +1028,7 @@ async function exportBoardImage(){
 
   x.textAlign="center";
   if(st.note){ x.fillStyle=C.ink; x.font=F(600,28); x.fillText(clipText(x,st.note,IMG_W-P*2),IMG_W/2,y+36); y+=50; }
-  if(qr){ const d=300; x.drawImage(qr,(IMG_W-d)/2,y+10,d,d); y+=330; }
+  if(qr){ const d=300, h=d*qr.height/qr.width; x.drawImage(qr,(IMG_W-d)/2,y+10,d,h); y+=h+30; }
   x.textAlign="left";
   stampLine(x,y+34);
   showImage(cropTo(c,y+58),"caulong-bang-tong.png");
@@ -989,7 +1092,7 @@ function adminSessions(root){
             <span class="muted small"> · ${s.parts.length} người</span></div>
           <div class="num b">${fmt(tot)}</div></div></div>
       </div>
-      <div class="small muted num" style="margin-top:3px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${numStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất</div>
+      <div class="small muted num" style="margin-top:3px">(${s.court} + ${s.shuttles}×${s.price||DEFAULT_PRICE}) / ${wStr(sWeight(s))} suất = ${fmt(sPerUnit(s))}/suất</div>
       <div class="bar"><i style="width:${tot>EPS?Math.round(got2/tot*100):0}%"></i></div>
       <div class="small">${settled?`<span class="ok b">✓ Đã thu đủ</span>`
         :`Đã thu <b class="num">${fmt(got2)}</b> / ${fmt(tot)} · còn <b class="due">${sUnpaid(s).length} người · ${fmt(d)}</b>`}</div>
@@ -999,7 +1102,7 @@ function adminSessions(root){
         return `<button class="chip ${on?"on":""}" data-pay-s="${esc(s.id)}" data-pay-m="${esc(p.mid)}"
           title="${on?`Đã trả${w?" "+w:""} — bấm để bỏ dấu`:`Chưa trả ${fmt(shareIn(s,p.mid))}`}">
           ${avatarHTML(m,20)}${on?'<span class="tick">✓</span>':""}<span class="nm2">${esc(fullName(m))}</span>${
-          p.weight!==1?`<span class="pill">×${numStr(p.weight)}</span>`:""}</button>`;
+          p.weight!==1?`<span class="pill">×${wStr(p.weight)}</span>`:""}</button>`;
       }).join("")}</div>
       <div class="row" style="margin-top:11px;gap:8px;flex-wrap:wrap">
         ${settled?`<button class="ghost mini" data-reopen="${esc(s.id)}">Bỏ dấu tất cả</button>`
@@ -1061,10 +1164,9 @@ function renderForm(){
       <div class="chk ${on?"on":""}" data-toggle="${esc(m.id)}">${on?"✓":""}</div>
       <button class="avbtn ${picOn("m",m.id)?"arm":""}" data-pic="m" data-picid="${esc(m.id)}">${avatarHTML(m,28)}</button>
       <div class="nm trunc">${esc(m.name)}${esc(dupTag(m))}${isPaid(draft,m.id)?` <span class="pill green">đã trả</span>`:""}</div>
-      ${on?`<button class="wbtn ${wt==1?"on":""}" data-w="1" data-m="${esc(m.id)}">1</button>
-            <button class="wbtn ${wt==0.5?"on":""}" data-w="0.5" data-m="${esc(m.id)}">½</button>
-            <input class="wnum" type="number" step="0.5" min="0" value="${wt}" data-wnum="${esc(m.id)}">`:""}
-    </div>`;
+      ${on?`${[0.5,1,2].map(q=>`<button class="wbtn ${wt==q?"on":""}" data-w="${q}" data-m="${esc(m.id)}">${q===0.5?"½":q}</button>`).join("")}
+            <input class="wnum" type="text" inputmode="decimal" value="${wStr(wt)}" data-wnum="${esc(m.id)}" title="Hệ số: 1 = một suất, 2 = trả cho cả bạn đi cùng, 0.5 = nửa buổi">`:""}
+    </div>${on&&wt===0?`<div class="tiny" style="color:var(--amber);margin:-2px 0 4px 34px">Hệ số 0 = chơi miễn phí, không phải trả gì.</div>`:""}`;
   }).join("");
   box.innerHTML=`<div class="card" style="border-color:var(--court)">
     <div class="between"><b>${editing?"Sửa buổi":"Buổi mới"}</b><button class="link" id="form-close">Đóng</button></div>
@@ -1100,8 +1202,17 @@ function renderForm(){
   });
   box.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{
     sync(); const p=draft.parts.find(x=>x.mid===b.dataset.m); if(p)p.weight=+b.dataset.w; renderForm(); });
-  box.querySelectorAll("[data-wnum]").forEach(i=>i.onchange=()=>{
-    sync(); const p=draft.parts.find(x=>x.mid===i.dataset.wnum); if(p)p.weight=+i.value||0; renderForm(); });
+  box.querySelectorAll("[data-wnum]").forEach(i=>{
+    i.oninput=()=>{ const ok=parseWeight(i.value)!==null;
+      i.style.borderColor=ok?"":"var(--danger)"; i.style.outlineColor=ok?"":"var(--danger)"; };
+    i.onchange=()=>{
+      sync(); const p=draft.parts.find(x=>x.mid===i.dataset.wnum); if(!p) return;
+      const v=parseWeight(i.value);
+      if(v===null){ toast(`Hệ số "${i.value}" không hợp lệ — nhập số từ 0 đến ${W_MAX}, vd 1 · 1.5 · 2`);
+        i.value=wStr(p.weight); i.style.borderColor=""; return; }
+      p.weight=v; renderForm();
+    };
+  });
   const addMem=()=>{
     sync(); const nm=val("f-newmem").trim(); if(!nm)return;
     const dup=st.members.filter(x=>x.name===nm).length;
@@ -1115,6 +1226,7 @@ function renderForm(){
   document.getElementById("f-save").onclick=()=>{
     sync();
     if(!draft.parts.length){ alert("Chọn ít nhất 1 người chơi."); return; }
+    if(sWeight(draft)<=0){ alert("Tổng hệ số đang bằng 0 — không chia được tiền. Ít nhất một người phải có hệ số lớn hơn 0."); return; }
     Object.keys(draft.paid).forEach(k=>{ if(!draft.parts.some(p=>p.mid===k)) delete draft.paid[k]; });
     const i=st.sessions.findIndex(s=>s.id===draft.id);
     const moi=i<0;
@@ -1126,7 +1238,7 @@ function renderForm(){
 }
 function formTotals(){
   const t=document.getElementById("f-tot"); if(!t||!draft)return;
-  t.innerHTML=`Tổng ${fmt(sTotal(draft))} · ${numStr(sWeight(draft))} suất · <b class="num">${fmt(sPerUnit(draft))}</b>/suất`;
+  t.innerHTML=`Tổng ${fmt(sTotal(draft))} · ${wStr(sWeight(draft))} suất · <b class="num">${fmt(sPerUnit(draft))}</b>/suất`;
 }
 
 function adminMembers(root){
@@ -1246,6 +1358,22 @@ function adminCollect(root){
       ||`<div class="card"><div class="empty">Không ai còn nợ 🎉</div></div>`}
     ${chosen.length&&chosen.length<owing.length
       ?`<div class="small muted num" style="margin:8px 2px">Đang chọn ${chosen.length}/${owing.length} · ${fmt(grand)} — bỏ sót ${fmt(totalOwing-grand)}</div>`:""}
+    ${chosen.length?`<h2 class="sec">Chi tiết ${chosen.length} người đang chọn · ${fmt(grand)}</h2>
+    <div class="card" style="padding:4px 14px">${chosen.map(r=>`
+      <div style="padding:10px 0;border-bottom:1px solid var(--line)">
+        <div class="row" style="gap:9px">${avatarHTML(r.m,28)}
+          <b style="flex:1;min-width:0" class="trunc">${esc(fullName(r.m))}</b>
+          <b class="num due">${fmt(r.due)}</b></div>
+        ${memberDueSessions(r.m.id).map(s2=>{
+          const w=(s2.parts.find(p=>p.mid===r.m.id)||{}).weight;
+          return `<div class="row small" style="gap:8px;margin:5px 0 0 37px">
+            <span style="flex:1;min-width:0" class="trunc">${esc(s2.date||"—")}${w!==1?` <span class="pill">×${wStr(w)}</span>`:""}</span>
+            <span class="num muted">${fmt(shareIn(s2,r.m.id))}</span></div>`;
+        }).join("")}
+      </div>`).join("")}
+      <div class="between" style="padding:10px 0"><b>Tổng</b><b class="num due" style="font-size:17px">${fmt(grand)}</b></div>
+    </div>
+    <button class="ghost" id="c-img" style="width:100%">📸 Xuất ảnh hoá đơn${chosen.length>1?` gộp ${chosen.length} người`:""}</button>`:""}
     <button class="primary" id="c-go" style="margin-top:10px" ${chosen.length?"":"disabled"}>
       ✓ Đã nhận tiền${chosen.length?` · ${fmt(grand)} · ${chosen.length} người`:""}</button>
 
@@ -1283,6 +1411,8 @@ function adminCollect(root){
       <div class="tiny muted" style="margin-top:8px">Giữ ${LOG_MAX} thao tác gần nhất. Nằm chung trong sổ nên không tốn thêm lần lưu nào.</div>
     </div>`;
 
+  const ci=document.getElementById("c-img");
+  if(ci) ci.onclick=()=>exportBillImage(chosen.map(r=>r.m));
   document.getElementById("c-all").onclick=()=>{ sel=new Set(owing.map(r=>r.m.id)); render(); };
   document.getElementById("c-none").onclick=()=>{ sel.clear(); render(); };
   root.querySelectorAll("[data-sel]").forEach(el=>el.onclick=()=>{

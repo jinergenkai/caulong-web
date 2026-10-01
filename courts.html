@@ -1,0 +1,821 @@
+<!doctype html>
+<!-- FILE SINH TỰ ĐỘNG từ alobo_crawler/viz/index.html — đừng sửa tay, chạy alobo_crawler/make_courts_page.py -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sân trống · Sổ Cầu Lông</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1a1d24; --ink2:#5b6472; --muted:#8b93a1;
+    --line:#e6e9ee; --line2:#eef1f5; --accent:#2563eb;
+    --free:#17a35a; --free-bg:#e7f7ee; --free-ring:#0f8a49;
+    --booked:#dd6a58; --booked-bg:#fbe9e5;
+    --locked:#aab2bf; --locked-bg:#eef1f5;
+    --event:#9a6de0; --event-bg:#f0e9fb;
+    --g0:#eceef1; --g1:#cdeed9; --g2:#9fe0bb; --g3:#66cd93; --g4:#2fb673; --g5:#12904f;
+    --shadow:0 1px 2px rgba(17,24,39,.05),0 4px 16px rgba(17,24,39,.05);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0f1216; --panel:#161a20; --ink:#e8ebef; --ink2:#a6afbd; --muted:#727c8a;
+    --line:#252b33; --line2:#1e232a; --accent:#5b8bf0;
+    --free:#3ad081; --free-bg:#12281d; --free-ring:#48e08f;
+    --booked:#e07b6a; --booked-bg:#2b1a16;
+    --locked:#5c6672; --locked-bg:#1c2128;
+    --event:#a985e6; --event-bg:#211a30;
+    --g0:#1c2128; --g1:#173325; --g2:#1c5238; --g3:#22794f; --g4:#2fa268; --g5:#4fd28c;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 16px 64px;}
+  header.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;margin-bottom:4px;}
+  h1{font-size:20px;font-weight:700;margin:0;letter-spacing:-.01em;}
+  .sub{color:var(--ink2);font-size:13px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:16px;margin-top:16px;}
+  .controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;}
+  .topbar{gap:10px 12px;align-items:center;}
+  #branchPick{flex:1 1 200px;min-width:140px;max-width:360px;}
+  #branchSel{width:100%;min-width:0;font-weight:600;}
+  #viewSeg{flex:0 0 auto;max-width:100%;}
+  .ctxrow{margin-top:10px;padding-top:10px;border-top:1px solid var(--line2);}
+  .ctxrow:empty,.ctxrow.hide{display:none;}
+  .ctxrow select{min-width:0;max-width:44vw;}
+  @media (max-width:640px){
+    #branchPick{flex:1 1 100%;max-width:100%;}
+    #viewSeg{flex-wrap:wrap;}                 /* tab xuống dòng, không giấu tab nào */
+    #viewSeg button{padding:6px 10px;}
+    .ctxrow select{max-width:40vw;}
+  }
+  .seg{display:inline-flex;background:var(--line2);border-radius:10px;padding:3px;gap:2px;}
+  .seg button{border:0;background:transparent;color:var(--ink2);font:inherit;font-weight:600;
+    padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;}
+  .seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .toggle{display:inline-flex;align-items:center;gap:7px;color:var(--ink2);cursor:pointer;user-select:none;}
+  .toggle input{accent-color:var(--accent);width:15px;height:15px;}
+  select{font:inherit;padding:6px 10px;border-radius:9px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;color:var(--ink2);font-size:12.5px;margin-top:2px;}
+  .lg{display:inline-flex;align-items:center;gap:6px;}
+  .sw{width:15px;height:15px;border-radius:4px;border:1px solid rgba(0,0,0,.08);display:inline-block;}
+  .hatch{background-image:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,.18) 3px,rgba(0,0,0,.18) 4px);}
+
+  /* heatmap chung */
+  .scroll{overflow-x:auto;}
+  table.hm{border-collapse:separate;border-spacing:3px;}
+  table.hm th{font-weight:600;color:var(--ink2);font-size:11.5px;text-align:center;
+    padding:2px 4px;white-space:nowrap;position:sticky;}
+  table.hm th.row{text-align:right;padding-right:8px;min-width:74px;position:sticky;left:0;background:var(--panel);z-index:2;}
+  table.hm th.col{top:0;background:var(--panel);}
+  td.cell{width:30px;height:26px;border-radius:5px;position:relative;cursor:default;}
+  td.cell.free{background:var(--free-bg);box-shadow:inset 0 0 0 1.5px var(--free-ring);}
+  td.cell.free::after{content:"";position:absolute;inset:0;margin:auto;width:7px;height:7px;
+    border-radius:50%;background:var(--free);}
+  td.cell.booked{background:var(--booked-bg);}
+  td.cell.booked::after{content:"";position:absolute;inset:6px;border-radius:3px;background:var(--booked);opacity:.55;}
+  td.cell.locked{background:var(--locked-bg);
+    background-image:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(128,128,128,.35) 4px,rgba(128,128,128,.35) 5px);}
+  td.cell.event{background:var(--event-bg);}
+  td.cell.event::after{content:"★";position:absolute;inset:0;display:flex;align-items:center;
+    justify-content:center;color:var(--event);font-size:12px;}
+  td.cell.dim{opacity:.34;}
+  /* day view: trục giờ ở vạch ranh giới (so le), ô rộng hơn */
+  table.day td.cell{width:46px;}
+  table.day th.tcol{position:relative;padding:0;height:18px;border:0;}
+  table.day th.tcol .l,table.day th.tcol .r{position:absolute;bottom:0;font-size:11px;
+    font-weight:600;color:var(--ink2);white-space:nowrap;}
+  table.day th.tcol .l{left:0;transform:translateX(-50%);}
+  table.day th.tcol .l.first{transform:none;}
+  table.day th.tcol .r{right:0;transform:none;}
+  td.cell.hl-free{box-shadow:inset 0 0 0 2px var(--free);}
+  /* overview */
+  td.ov{width:52px;height:34px;border-radius:6px;text-align:center;font-weight:700;font-size:13px;color:var(--ink);}
+  td.ov small{display:block;font-weight:500;font-size:9.5px;color:var(--ink2);}
+  /* overview mini-timeline */
+  td.ov2{padding:3px 5px;vertical-align:middle;min-width:62px;}
+  .minibar{display:flex;gap:1.5px;height:15px;border-radius:4px;overflow:hidden;}
+  .minibar i{flex:1;min-width:3px;}
+  .minibar i.free{background:var(--free);}
+  .minibar i.booked{background:var(--booked);}
+  .minibar i.event{background:var(--event);}
+  .minibar i.locked{background:var(--locked);
+    background-image:repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(255,255,255,.35) 2px,rgba(255,255,255,.35) 3px);}
+  .ovh{text-align:center;font-size:10.5px;font-weight:700;color:var(--ink2);margin-top:2px;line-height:1;}
+  .ovh small{font-weight:500;color:var(--muted);}
+
+  .hint{color:var(--muted);font-size:12.5px;margin-top:10px;}
+  .free-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .chip{background:var(--free-bg);color:var(--free);border:1px solid var(--free-ring);
+    border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:600;}
+  .chip.none{background:var(--line2);color:var(--muted);border-color:var(--line);font-weight:500;}
+  .tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;
+    padding:6px 9px;border-radius:8px;opacity:0;transform:translateY(-4px);transition:opacity .1s;
+    z-index:50;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.25);}
+  .weekday-w{color:var(--muted);}
+  .kpis{display:flex;flex-wrap:wrap;gap:12px;margin-top:2px;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:120px;}
+  .kpi b{font-size:22px;font-weight:750;letter-spacing:-.02em;display:block;}
+  .kpi span{color:var(--ink2);font-size:12px;}
+  .kpi.good b{color:var(--free);}
+  @media (max-width:520px){ td.ov{width:42px} th.row{min-width:58px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a href="./" style="color:inherit;opacity:.7;text-decoration:none;font-size:13px;margin-right:8px">← Sổ cầu lông</a>
+    <h1 id="title">Sân trống</h1>
+    <span class="sub" id="pubStamp" style="margin-left:auto"></span>
+    <button id="crawlNow" hidden style="margin-left:8px;border:1px solid currentColor;background:none;color:inherit;border-radius:8px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer" title="Chỉ admin thấy nút này">⟳ Cào ngay</button>
+    <span class="sub" id="subtitle"></span>
+  </header>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card">
+    <div class="controls topbar">
+      <span id="branchPick" style="display:none"><select id="branchSel"></select></span>
+      <div class="seg" id="viewSeg">
+        <button data-v="day" class="on">Theo ngày</button>
+        <button data-v="overview">Tổng quan</button>
+        <button data-v="finder">🔍 Tìm slot</button>
+      </div>
+    </div>
+    <div class="controls ctxrow" id="ctxRow">
+      <span id="sportPick" style="display:none">Môn: <select id="sportSel"></select></span>
+      <span id="dayPick" style="display:none">Ngày: <select id="daySel"></select></span>
+      <span id="rangePick">Giờ: <select id="rangeFrom"></select> – <select id="rangeTo"></select></span>
+      <label class="toggle"><input type="checkbox" id="wdChk" checked> Chỉ T2–T6</label>
+      <span id="courtPick" style="display:none">Sân: <select id="courtSel"></select></span>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="card" id="mainCard">
+    <div id="board" class="scroll"></div>
+    <div id="freePanel"></div>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="card" id="finderCard" hidden>
+    <div style="font-weight:700">Tìm slot theo khung yêu thích</div>
+    <div class="hint" style="margin-top:0">Chọn thứ + khung giờ → liệt kê mọi ngày sắp tới còn sân trống (mọi sân bạn theo dõi), để đặt sớm.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;margin-top:12px">
+      <div><div class="hint" style="margin:0 0 4px">Thứ</div><div id="fDays" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+      <div><div class="hint" style="margin:0 0 4px">Khung giờ</div>
+        <select id="fFrom"></select> – <select id="fTo"></select></div>
+      <label class="toggle" style="align-self:flex-end"><input type="checkbox" id="fAllBranch" checked> Mọi sân đang theo dõi</label>
+    </div>
+    <div id="finderResult" style="margin-top:16px"></div>
+  </div>
+
+  <div class="card" id="crawlCard" hidden>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-weight:700">Cào dữ liệu</div>
+        <div class="hint" style="margin-top:0" id="crawlMeta"></div>
+      </div>
+      <button id="crawlBtn" style="background:var(--accent);color:#fff;border:0;border-radius:10px;
+        padding:10px 20px;font:inherit;font-weight:700;cursor:pointer">⟳ Cào lại ngay</button>
+    </div>
+    <div id="crawlState" class="hint" style="margin-top:10px"></div>
+    <div id="coverage" style="margin-top:8px" class="scroll"></div>
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--ink2);font-weight:600">Log lần cào gần nhất</summary>
+      <pre id="crawlLog" style="background:var(--line2);border-radius:10px;padding:12px;margin-top:8px;
+        font-size:12px;overflow:auto;max-height:280px;white-space:pre-wrap"></pre>
+    </details>
+    <div class="hint" style="margin-top:12px">
+      Nút này chạy <code>scheduler.py --once</code> (Playwright của bạn gọi API + giải mã).
+      Tự động định kỳ: chạy <code>python scheduler.py</code> (lặp mỗi <span id="ivMin">30</span>′)
+      hoặc đặt cron/Task Scheduler.
+    </div>
+  </div>
+
+  <div class="card" id="settingsCard" hidden>
+    <div style="font-weight:700;margin-bottom:2px">Phạm vi ngày</div>
+    <div class="hint" style="margin-top:0">Số ngày tính <b>từ hôm nay</b> để cào &amp; hiển thị (gồm cả T7/CN).
+      Đặt nhỏ để né rate limit / gọn mắt, lớn để nhìn xa. Dùng chung cho cả crawler lẫn view.</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+      <input id="daysWindow" type="number" min="1" max="60" step="1"
+        style="width:90px;font:inherit;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
+      <span class="hint" style="margin:0">ngày</span>
+      <span id="dwMsg" class="hint" style="margin:0"></span>
+    </div>
+    <div style="height:1px;background:var(--line);margin:18px 0"></div>
+    <div style="font-weight:700;margin-bottom:2px">Sân đang theo dõi</div>
+    <div class="hint" style="margin-top:0">Tick để thêm/bỏ. Bấm “Lưu” ghi vào <code>config.json</code> — scheduler quét đúng danh sách này.</div>
+    <div id="dirList" style="margin-top:12px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px">
+      <input id="addBranch" placeholder="branchId khác (vd sport_xyz_badminton)"
+        style="flex:1;min-width:220px;font:inherit;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
+      <button id="addBtn" class="seg" style="padding:7px 14px;cursor:pointer;font-weight:600">+ Thêm</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+      <button id="saveBtn" style="background:var(--accent);color:#fff;border:0;border-radius:10px;
+        padding:9px 18px;font:inherit;font-weight:700;cursor:pointer">Lưu</button>
+      <span id="saveMsg" class="hint" style="margin:0"></span>
+    </div>
+    <div class="hint" style="margin-top:16px">
+      Lấy đủ danh bạ sân từ API <code>get_quick_search</code>/<code>branches</code> (đã mã hoá):
+      giải mã rồi thả file vào <code>data/</code>, sân sẽ hiện ở đây. Xem <code>API_ENDPOINTS.md</code>.
+    </div>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const WD_FULL = {T2:"Thứ 2",T3:"Thứ 3",T4:"Thứ 4",T5:"Thứ 5",T6:"Thứ 6",T7:"Thứ 7",CN:"Chủ nhật"};
+let DATA=null, G=null, state={view:"day", date:null, range:{start:"18:00",end:"22:00"}, wd:true, sport:null};
+let FINDER={days:[0,1,2,3,4], start:"18:00", end:"20:00"};   // tìm slot: mặc định T2–T6, 18–20h
+const LS_KEY='alobo_prefs';
+function loadPrefs(){ try{ const p=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  if(p.range&&p.range.start&&p.range.end) state.range=p.range;
+  if(typeof p.wd==='boolean') state.wd=p.wd;
+  if(p.sport) state._sportPref=p.sport;
+  if(p.branch) state._branchPref=p.branch;
+  if(p.finder) FINDER=Object.assign(FINDER, p.finder);
+  if(p.view) state.view=p.view;
+}catch(e){} }
+function savePrefs(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(
+  {range:state.range, wd:state.wd, sport:state.sport, finder:FINDER, view:state.view,
+   branch:(G?G.branch:state._branchPref)})); }catch(e){} }
+const SPORT_LABEL={badminton:"Cầu lông", pickleball:"Pickleball", all:"Tất cả"};
+function courtsInView(){
+  if(!state.sport||state.sport==="all") return G.courts;
+  const m=G.court_sport||{};
+  return G.courts.filter(c=>(m[c]||"badminton")===state.sport);
+}
+function sportsAvailable(){
+  const m=G.court_sport||{}; const set=new Set(G.courts.map(c=>m[c]||"badminton"));
+  return [...set];
+}
+const tip = document.getElementById('tip');
+
+function fmtDate(iso){const [y,m,d]=iso.split('-');return `${d}/${m}`;}
+function slotsInView(){ return G.slots.filter(s => s>=state.range.start && s<state.range.end); }
+function addMinG(t,m){let[a,b]=t.split(':').map(Number);let x=a*60+b+m;return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');}
+function daysInView(){
+  const f=G.days.filter(d => !(state.wd && d.is_weekend));
+  return f.length ? f : G.days;   // rong (chi cuoi tuan) -> tam hien tat ca
+}
+function weekendOnly(){ return state.wd && !G.days.some(d=>!d.is_weekend); }
+function occSet(){ if(!G.__occ){G.__occ=new Set(G.occupied.map(c=>c.court+"|"+c.date+"|"+c.slot))
+    ;G.__stat={};G.occupied.forEach(c=>G.__stat[c.court+"|"+c.date+"|"+c.slot]=c.status);} return G.__occ; }
+function statusAt(court,date,slot){
+  occSet(); const k=court+"|"+date+"|"+slot;
+  if(G.__occ.has(k)) return G.__stat[k]||"booked";
+  return "free";
+}
+
+function showTip(e,html){ tip.innerHTML=html; tip.style.opacity=1;
+  const x=Math.min(e.clientX+12, innerWidth-tip.offsetWidth-8);
+  tip.style.left=x+"px"; tip.style.top=(e.clientY-tip.offsetHeight-8)+"px"; }
+function hideTip(){ tip.style.opacity=0; }
+
+function priceAt(court,date,slot){
+  const P=G.prices; if(!P) return null;
+  const jsw=new Date(date+'T00:00:00').getDay();   // 0=CN..6=T7
+  const w=(jsw+6)%7;                                // ->0=T2..6=CN
+  for(const key of [court,'*']){ for(const r of (P[key]||[])){
+    if((r.days===null||r.days.includes(w)) && r.start<=slot && slot<r.end) return r.price; } }
+  return null;
+}
+function fmtPrice(n){ if(n==null) return '';
+  if(n>=1000000) return (n/1000000).toFixed(n%1000000?1:0)+'tr';
+  if(n>=1000) return Math.round(n/1000)+'k'; return ''+n; }
+function priceRange(courts,date,slots){
+  const set=new Set();
+  courts.forEach(c=>slots.forEach(s=>{const p=priceAt(c,date,s); if(p!=null) set.add(p);}));
+  const a=[...set].sort((x,y)=>x-y);
+  if(!a.length) return null;
+  return a.length===1?fmtPrice(a[0]):`${fmtPrice(a[0])}–${fmtPrice(a[a.length-1])}`;
+}
+function courtMaxPrice(court){
+  const P=G.prices; if(!P) return null; let mx=null;
+  for(const key of [court,'*']) for(const r of (P[key]||[])) if(mx==null||r.price>mx) mx=r.price;
+  return mx;
+}
+function branchMaxPrice(){
+  if(!G.prices) return null; let mx=null;
+  for(const c of courtsInView()){ const m=courtMaxPrice(c); if(m!=null&&(mx==null||m>mx)) mx=m; }
+  return mx;
+}
+
+/* ---------- Tổng quan: sân × ngày, mỗi ô = mini-timeline chia khúc ---------- */
+function hourBuckets(slots){
+  const hk=[...new Set(slots.map(s=>s.slice(0,2)))];
+  return hk.map(h=>({h, slots:slots.filter(s=>s.slice(0,2)===h)}));
+}
+function renderOverview(){
+  const slots=slotsInView(), days=daysInView();
+  const hours=hourBuckets(slots);
+  let h='<table class="hm"><thead><tr><th class="row"></th>';
+  days.forEach(d=>{h+=`<th class="col ${d.is_weekend?'weekday-w':''}">${d.weekday}<br><span class="sub">${fmtDate(d.date)}</span></th>`;});
+  h+='</tr></thead><tbody>';
+  courtsInView().forEach(ct=>{
+    h+=`<tr><th class="row">${ct}</th>`;
+    days.forEach(d=>{
+      // khúc theo GIỜ (gộp 2 nửa) cho gọn — 1 giờ = 1 khúc, trạng thái xấu nhất trong giờ
+      const segs=hours.map(hb=>{
+        const sts=hb.slots.map(s=>statusAt(ct,d.date,s));
+        const st = sts.includes('booked')?'booked' : sts.includes('locked')?'locked'
+                 : sts.includes('event')?'event' : sts.every(x=>x==='free')?'free':'booked';
+        return st;
+      });
+      const freeH=segs.filter(x=>x==='free').length;
+      const bar=segs.map(st=>`<i class="${st}"></i>`).join('');
+      h+=`<td class="ov2" data-ct="${ct}" data-date="${d.date}" data-free="${freeH}" data-tot="${hours.length}">
+            <div class="minibar">${bar}</div>
+            <div class="ovh" style="${freeH?'color:var(--free)':''}">${freeH}<small>/${hours.length}</small></div>
+          </td>`;
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  const b=document.getElementById('board'); b.innerHTML=h;
+  b.querySelectorAll('td.ov2').forEach(td=>{
+    td.onmousemove=e=>{ const dObj=G.days.find(x=>x.date===td.dataset.date);
+      const freeList=hours.filter(hb=>hb.slots.every(s=>statusAt(td.dataset.ct,td.dataset.date,s)==='free'))
+                          .map(hb=>hb.h+'h');
+      showTip(e,`<b>${td.dataset.ct}</b> · ${WD_FULL[dObj.weekday]} ${fmtDate(td.dataset.date)}<br>
+        ${td.dataset.free}/${td.dataset.tot} giờ trống${freeList.length?': '+freeList.join(', '):''}`); };
+    td.onmouseleave=hideTip;
+    td.onclick=()=>{ state.view="day"; state.date=td.dataset.date; syncControls(); render(); };
+  });
+  document.getElementById('freePanel').innerHTML='';
+  document.getElementById('hint').innerHTML="Mỗi ô = buổi tối của một sân, chia theo <b>giờ</b>: xanh = trống, đỏ = đã đặt, xám = khoá. Số = <b>giờ trống/tổng giờ</b>. Bấm ô để xem chi tiết ngày.";
+}
+
+/* ---------- Chi tiết: 1 sân, ngày × giờ ---------- */
+const STLABEL={free:"Trống",booked:"Đã đặt",locked:"Khoá (chờ mở)",event:"Sự kiện"};
+function ensureDay(){
+  const sel=document.getElementById('daySel');
+  if(sel.dataset.branch!==G.branch){
+    sel.innerHTML=G.days.map(d=>`<option value="${d.date}">${WD_FULL[d.weekday]} · ${fmtDate(d.date)}</option>`).join('');
+    sel.dataset.branch=G.branch;
+    if(!G.days.some(d=>d.date===state.date)) state.date=null;
+  }
+  if(!state.date) state.date = (G.days.find(d=>!d.is_weekend)||G.days[0]||{}).date;
+  sel.value=state.date;
+}
+function renderDay(){
+  ensureDay();
+  const date=state.date; const dObj=G.days.find(x=>x.date===date)||{weekday:''};
+  const slots=slotsInView(), courts=courtsInView(), step=G.slot_minutes||30;
+  const addMin=(t,m)=>{let[a,b]=t.split(':').map(Number);let x=a*60+b+m;
+    return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');};
+  // bảng: HÀNG = sân, CỘT = giờ. Nhãn giờ ở VẠCH ranh giới (so le), có cả mốc cuối.
+  let h='<table class="hm day"><thead><tr><th class="row"></th>';
+  const onHour=t=>t.endsWith(':00');
+  slots.forEach((s,i)=>{ const last=i===slots.length-1; const end=addMin(s,step);
+    const lab=onHour(s)?`<span class="l${i===0?' first':''}">${s}</span>`:'';
+    const endLab=(last&&onHour(end))?`<span class="r">${end}</span>`:'';
+    h+=`<th class="tcol">${lab}${endLab}</th>`;});
+  h+='</tr></thead><tbody>';
+  courts.forEach(c=>{
+    h+=`<tr><th class="row">${c}</th>`;
+    slots.forEach(s=>{
+      const st=statusAt(c,date,s);
+      h+=`<td class="cell ${st}" data-c="${c}" data-slot="${s}" data-st="${st}"></td>`;
+    });
+    h+='</tr>';
+  });
+  // hàng chân: số sân trống mỗi khung giờ
+  h+='<tr><th class="row" style="color:var(--free);font-weight:700">Trống</th>';
+  slots.forEach(s=>{
+    const n=courts.filter(c=>statusAt(c,date,s)==="free").length;
+    h+=`<td style="text-align:center;font-weight:700;color:${n?'var(--free)':'var(--muted)'}">${n||'·'}</td>`;
+  });
+  h+='</tr></tbody></table>';
+  const b=document.getElementById('board'); b.innerHTML=h;
+  b.querySelectorAll('td.cell').forEach(td=>{
+    td.onmousemove=e=>{ const pr=priceAt(td.dataset.c,date,td.dataset.slot);
+      const ps=pr!=null?` · <b style="color:var(--accent)">${fmtPrice(pr)}/giờ</b>`:'';
+      showTip(e,`<b>${td.dataset.c}</b> · ${td.dataset.slot}<br>
+        <b style="color:${td.dataset.st==='free'?'var(--free)':(td.dataset.st==='locked'?'var(--event)':'inherit')}">${STLABEL[td.dataset.st]}</b>${ps}`); };
+    td.onmouseleave=hideTip;
+  });
+  // dòng giá khung tối (nếu có products)
+  const rng=priceRange(courts,date,slots);
+  document.getElementById('freePanel').innerHTML = rng
+    ? `<div class="hint" style="margin-top:12px">💵 Giá ${state.range.start}–${state.range.end}: <b>${rng}/giờ</b>${rng.includes('–')?' (nhiều mức — hover từng ô)':''}</div>`
+    : '';
+  document.getElementById('hint').textContent="";
+}
+
+function renderLegend(){
+  const items = [["free","Trống"],["booked","Đã đặt"],["locked","Khoá (chờ mở)"],["event","Sự kiện"]];
+  const swClass={locked:"hatch"};
+  document.getElementById('legend').innerHTML = items.map(([k,l])=>{
+    const isStat=["free","booked","locked","event"].includes(k);
+    const bg=isStat?`var(--${k}-bg)`:`var(--${k})`;
+    const ring=k==="free"?"box-shadow:inset 0 0 0 1.5px var(--free-ring)":"";
+    const dot=k==="free"?'<i style="position:absolute;inset:0;margin:auto;width:6px;height:6px;border-radius:50%;background:var(--free)"></i>':'';
+    return `<span class="lg"><span class="sw ${swClass[k]||''}" style="background:${bg};position:relative;${ring}">${dot}</span>${l}</span>`;
+  }).join('');
+}
+
+function renderKpis(){
+  const rg=state.range, slots=G.slots.filter(s=>s>=rg.start&&s<rg.end);
+  const days=G.days.filter(d=>!d.is_weekend);
+  let free=0,total=0;
+  const CV=courtsInView();
+  CV.forEach(ct=>days.forEach(d=>slots.forEach(s=>{total++; if(statusAt(ct,d.date,s)==="free")free++;})));
+  const daysWithFree=days.filter(d=>CV.some(ct=>slots.some(s=>statusAt(ct,d.date,s)==="free"))).length;
+  const bmp=branchMaxPrice();
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi good"><b>${free}</b><span>ô trống ${rg.start}–${rg.end} (T2–T6)</span></div>
+    <div class="kpi"><b>${daysWithFree}/${days.length}</b><span>ngày T2–T6 có chỗ</span></div>
+    <div class="kpi"><b>${CV.length}</b><span>sân</span></div>`
+    + (bmp!=null?`<div class="kpi"><b style="color:var(--accent)">${fmtPrice(bmp)}</b><span>giá trần / giờ</span></div>`
+                : `<div class="kpi"><b>${G.days.length}</b><span>ngày theo dõi</span></div>`);
+}
+
+function timeOptions(){ // các mốc 30' trong giờ hoạt động
+  const h=G.hours||{start:"06:00",end:"22:00"}; const out=[]; let t=h.start;
+  while(t<=h.end){ out.push(t); t=addMinG(t,G.slot_minutes||30); } return out;
+}
+function fillRangeSelects(){
+  const opts=timeOptions();
+  const rf=document.getElementById('rangeFrom'), rt=document.getElementById('rangeTo');
+  if(rf.dataset.b!==G.branch){
+    rf.innerHTML=opts.slice(0,-1).map(t=>`<option>${t}</option>`).join('');
+    rt.innerHTML=opts.slice(1).map(t=>`<option>${t}</option>`).join('');
+    rf.dataset.b=rt.dataset.b=G.branch;
+  }
+  rf.value=state.range.start; rt.value=state.range.end;
+}
+function syncControls(){
+  document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
+  document.getElementById('wdChk').checked=state.wd;
+  if(G) fillRangeSelects();
+}
+
+/* ---------- Tìm slot theo khung yêu thích (đa sân) ---------- */
+const WDX=['T2','T3','T4','T5','T6','T7','CN'];
+function occSetFor(g){ if(!g.__occ){ g.__occ=new Set(g.occupied.map(c=>c.court+'|'+c.date+'|'+c.slot));
+  g.__stat={}; g.occupied.forEach(c=>g.__stat[c.court+'|'+c.date+'|'+c.slot]=c.status); } return g.__occ; }
+function statusG(g,court,date,slot){ occSetFor(g); const k=court+'|'+date+'|'+slot;
+  return g.__occ.has(k)?(g.__stat[k]||'booked'):'free'; }
+function badmintonCourts(g){ const m=g.court_sport||{};
+  const bad=g.courts.filter(c=>(m[c]||'badminton')==='badminton'); return bad.length?bad:g.courts; }
+function renderFinder(){
+  const chips=document.getElementById('fDays');
+  chips.innerHTML=WDX.map((w,i)=>`<button data-d="${i}" style="border:1px solid var(--line);border-radius:8px;padding:5px 11px;font:inherit;font-weight:600;cursor:pointer;background:${FINDER.days.includes(i)?'var(--accent)':'var(--panel)'};color:${FINDER.days.includes(i)?'#fff':'var(--ink2)'}">${w}</button>`).join('');
+  chips.querySelectorAll('button').forEach(b=>b.onclick=()=>{ const d=+b.dataset.d,i=FINDER.days.indexOf(d);
+    if(i<0)FINDER.days.push(d); else FINDER.days.splice(i,1); savePrefs(); renderFinder(); });
+  const opts=timeOptions(), ff=document.getElementById('fFrom'), ft=document.getElementById('fTo');
+  if(!ff.options.length){ ff.innerHTML=opts.slice(0,-1).map(t=>`<option>${t}</option>`).join('');
+    ft.innerHTML=opts.slice(1).map(t=>`<option>${t}</option>`).join(''); }
+  ff.value=FINDER.start; ft.value=FINDER.end;
+  ff.onchange=()=>{FINDER.start=ff.value; savePrefs(); runFinder();};
+  ft.onchange=()=>{FINDER.end=ft.value; savePrefs(); runFinder();};
+  document.getElementById('fAllBranch').onchange=runFinder;
+  runFinder();
+}
+function runFinder(){
+  const all=document.getElementById('fAllBranch').checked;
+  const mon=monitoredSet();
+  const branches=all?DATA.branches.filter(g=>g.branch!=='demo'&&(mon.size?mon.has(g.branch):true)):[G];
+  const found=[];
+  branches.forEach(g=>{
+    const courts=badmintonCourts(g);
+    const slots=g.slots.filter(s=>s>=FINDER.start&&s<FINDER.end);
+    g.days.forEach(d=>{
+      if(!FINDER.days.includes(WDX.indexOf(d.weekday))) return;
+      const freeSlots=slots.filter(s=>courts.some(c=>statusG(g,c,d.date,s)==='free'));
+      if(!freeSlots.length) return;
+      let mx=0; freeSlots.forEach(s=>{const n=courts.filter(c=>statusG(g,c,d.date,s)==='free').length; if(n>mx)mx=n;});
+      found.push({date:d.date, weekday:d.weekday, g, name:g.branch_name, freeSlots, maxFree:mx});
+    });
+  });
+  found.sort((a,b)=> a.date<b.date?-1:a.date>b.date?1:a.name.localeCompare(b.name));
+  let h='', cur='';
+  found.forEach(r=>{
+    if(r.date!==cur){ cur=r.date; h+=`<div style="font-weight:700;margin-top:16px;color:var(--ink)">${WD_FULL[r.weekday]||r.weekday} · ${fmtDate(r.date)}</div>`; }
+    h+=`<div class="finder-row" data-b="${r.g.branch}" data-date="${r.date}" style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;cursor:pointer;padding:4px 0">
+      <span style="min-width:190px;font-weight:600">${r.name}</span>
+      <div class="free-list">${r.freeSlots.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+      <span class="hint" style="margin:0">tối đa ${r.maxFree} sân</span></div>`;
+  });
+  const nDays=[...new Set(found.map(r=>r.date))].length;
+  document.getElementById('finderResult').innerHTML = found.length
+    ? `<div class="hint">Có chỗ trong <b>${nDays}</b> ngày · khung ${FINDER.start}–${FINDER.end}. Bấm một dòng để mở chi tiết ngày.</div>`+h
+    : '<div class="hint">Không có slot trống trong khung đã chọn — thử nới khung giờ hoặc thêm thứ.</div>';
+  document.querySelectorAll('#finderResult .finder-row').forEach(row=>row.onclick=()=>{
+    const i=DATA.branches.findIndex(x=>x.branch===row.dataset.b); selectBranch(i);
+    state.view='day'; state.date=row.dataset.date; state.range={start:FINDER.start,end:FINDER.end};
+    syncControls(); render();
+  });
+}
+
+function render(){
+  if(state.view==="crawl"||state.view==="settings") state.view="day";
+  savePrefs();
+  const v=state.view;
+  const isChart = v==="day"||v==="overview";
+  document.getElementById('mainCard').hidden = !isChart;
+  document.getElementById('settingsCard').hidden = v!=="settings";
+  document.getElementById('crawlCard').hidden = v!=="crawl";
+  document.getElementById('finderCard').hidden = v!=="finder";
+  document.getElementById('ctxRow').classList.toggle('hide', !isChart);
+  document.getElementById('rangePick').style.display = isChart?'':'none';
+  const hasWeekend = G && G.days.some(d=>d.is_weekend);
+  document.getElementById('wdChk').closest('.toggle').style.display =
+    (v==="overview" && hasWeekend)?'':'none';
+  document.getElementById('courtPick').style.display='none';
+  document.getElementById('dayPick').style.display = (v==="day")?'':'none';
+  // thanh chọn sân LUÔN hiện (mọi tab) để không nhảy layout khi đổi tab
+  document.getElementById('branchPick').style.display =
+    (DATA && visibleBranchIdx().length>1)?'':'none';
+  // bộ lọc môn — chỉ hiện khi sân có >1 môn
+  const av=G?sportsAvailable():[];
+  const sp=document.getElementById('sportPick'), ss=document.getElementById('sportSel');
+  if(isChart && av.length>1){
+    sp.style.display='';
+    const opts=[...av,'all'];
+    if(ss.options.length!==opts.length||ss.dataset.b!==G.branch){
+      ss.innerHTML=opts.map(x=>`<option value="${x}">${SPORT_LABEL[x]||x}</option>`).join('');
+      ss.dataset.b=G.branch;
+    }
+    ss.value=state.sport;
+  } else sp.style.display='none';
+  document.getElementById('legend').style.display = isChart?'':'none';
+  if(v==="settings"){ renderSettings(); return; }
+  if(v==="crawl"){ renderCrawl(); return; }
+  if(v==="finder"){ renderFinder(); return; }
+  renderLegend();
+  if(v==="overview") renderOverview(); else renderDay();
+}
+
+let DIR=null, CFG=null;
+function renderSettings(){
+  const dw=document.getElementById('daysWindow');
+  if(CFG===null){ fetch('/api/config').then(r=>r.json()).then(c=>{ CFG=c;
+    dw.value=c.days_window||c.days_ahead||21; }); }
+  const box=document.getElementById('dirList');
+  if(!DIR){ box.innerHTML='<span class="hint">Đang tải…</span>';
+    fetch('/api/directory').then(r=>r.json()).then(d=>{DIR=d; drawDir();}); return; }
+  drawDir();
+}
+function drawDir(){
+  const box=document.getElementById('dirList');
+  box.innerHTML = DIR.branches.map(b=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);
+      border-radius:10px;margin-bottom:7px;cursor:pointer;background:var(--panel)">
+      <input type="checkbox" class="dirchk" data-id="${b.id}" ${b.monitored?'checked':''} style="width:16px;height:16px;accent-color:var(--accent)">
+      <span style="flex:1"><b>${b.name}</b>
+        <span class="hint" style="margin:0"> · ${b.id}${b.sport?' · '+b.sport:''}</span></span>
+      ${b.has_data?'<span class="chip">có dữ liệu</span>':''}
+    </label>`).join('');
+}
+function currentSelection(){
+  return [...document.querySelectorAll('.dirchk')].filter(c=>c.checked).map(c=>c.dataset.id);
+}
+
+/* ---------- Cào dữ liệu ---------- */
+let crawlPoll=null;
+function renderCrawl(){ fetchCrawl(); }
+function fetchCrawl(){
+  fetch('/api/crawl').then(r=>r.json()).then(drawCrawl).catch(()=>{});
+}
+function drawCrawl(s){
+  const cov=s.coverage;
+  document.getElementById('ivMin').textContent=cov.interval_min;
+  const au=s.auto||{};
+  const autoTxt = au.enabled
+    ? `<span style="color:var(--free)">● Tự động BẬT</span> · mỗi ${au.interval_min}′`
+      + (au.next_run?` · lần tới ${au.next_run.slice(11,16)}`:'')
+    : `<span style="color:var(--muted)">○ Tự động TẮT</span> · cào tay / cron`;
+  document.getElementById('crawlMeta').innerHTML=
+    `Lần cào gần nhất: <b>${cov.last_data_age}</b> · ${cov.branches.length} sân · ${autoTxt}`;
+  const btn=document.getElementById('crawlBtn');
+  btn.disabled=s.running; btn.textContent=s.running?'⟳ Đang cào…':'⟳ Cào lại ngay';
+  btn.style.opacity=s.running?.6:1; btn.style.cursor=s.running?'default':'pointer';
+  let st='';
+  if(s.running) st=`<span style="color:var(--accent)">● Đang cào (bắt đầu ${s.started||''})…</span>`;
+  else if(s.finished) st=`Xong lúc ${s.finished}`+(s.returncode?` <span style="color:var(--booked)">(mã lỗi ${s.returncode})</span>`:' ✓');
+  document.getElementById('crawlState').innerHTML=st;
+  document.getElementById('crawlLog').textContent=s.log_tail||'(chưa có log)';
+
+  // bảng coverage: branch × ngày. Khi có lượt cào (tracking): phân biệt
+  // ô VỪA CÀO (xanh sáng) vs data CŨ chưa cào lại (xám mờ) vs CHƯA CÓ (đỏ).
+  const track=cov.tracking;
+  const freshTot=cov.branches.reduce((n,b)=>n+(b.fresh||0),0);
+  const haveTot=cov.branches.reduce((n,b)=>n+b.have,0);
+  const cellTot=cov.branches.reduce((n,b)=>n+b.total,0);
+  let h='';
+  if(track){
+    h+=`<div class="hint" style="margin:0 0 8px">
+      ${s.running?`<b style="color:var(--accent)">Đang cào…</b> `:''}
+      Lượt này đã cập nhật <b style="color:var(--free)">${freshTot}</b>/${cellTot} ô ·
+      <span style="display:inline-flex;gap:12px;vertical-align:middle">
+        <span class="lg"><span class="sw" style="background:var(--free-bg);box-shadow:inset 0 0 0 1.5px var(--free-ring)"></span>vừa cào</span>
+        <span class="lg"><span class="sw" style="background:var(--locked-bg);opacity:.6"></span>data cũ</span>
+        <span class="lg"><span class="sw" style="background:var(--booked-bg)"></span>chưa có</span>
+      </span></div>`;
+  } else {
+    h+=`<div class="hint" style="margin:0 0 8px">${haveTot}/${cellTot} ô có dữ liệu.
+      Bấm “Cào lại ngay” để thấy màu xanh chạy dần theo tiến độ cào.</div>`;
+  }
+  cov.branches.forEach(b=>{
+    const extra = track ? ` · <span style="color:var(--free)">${b.fresh||0} vừa cào</span>` : '';
+    h+=`<div style="margin-top:14px"><b>${b.branch}</b> — ${b.have}/${b.total} ngày có dữ liệu${extra}
+        · Khoá: ${b.aux.locks.has?b.aux.locks.age:'chưa'} · Sân(cores): ${b.aux.cores.has?b.aux.cores.age:'chưa'}</div>`;
+    h+='<table class="hm" style="margin-top:6px"><tbody><tr>';
+    b.days.forEach(d=>{
+      let bg,ring='',op='';
+      if(!d.has){ bg='var(--booked-bg)'; }                                   // chưa có
+      else if(track && d.fresh){ bg='var(--free-bg)'; ring='box-shadow:inset 0 0 0 1.5px var(--free-ring)'; } // vừa cào
+      else if(track){ bg='var(--locked-bg)'; op='opacity:.55'; }             // data cũ, chưa cào lại
+      else { bg='var(--free-bg)'; ring='box-shadow:inset 0 0 0 1.5px var(--free-ring)'; } // idle: có data
+      const tt=d.has?(track&&d.fresh?'vừa cào '+d.age:'data cũ · cào '+d.age):'chưa có';
+      h+=`<td title="${d.date} · ${tt}" style="width:44px;height:34px;border-radius:6px;
+        text-align:center;font-size:10.5px;background:${bg};${ring};${op};color:var(--ink2)">
+        ${d.weekday}<br>${d.date.slice(8)}</td>`;
+    });
+    h+='</tr></tbody></table>';
+  });
+  if(!cov.branches.length) h='<div class="hint">Chưa cấu hình sân nào — vào tab ⚙ Cài đặt sân.</div>';
+  document.getElementById('coverage').innerHTML=h;
+
+  // poll khi đang chạy
+  if(s.running && !crawlPoll){ crawlPoll=setInterval(fetchCrawl,2000); }
+  if(!s.running && crawlPoll){ clearInterval(crawlPoll); crawlPoll=null;
+    if(DATA) reloadData();   // cào xong: nạp lại data + G để view khác thấy ngay
+  }
+}
+
+function selectBranch(i){
+  G=DATA.branches[i]; delete G.__occ;
+  const bs=document.getElementById('branchSel'); if(bs && bs.options.length) bs.value=String(i);
+  document.getElementById('title').textContent=G.branch_name;
+  document.getElementById('subtitle').textContent=
+    `${G.days.length} ngày · ${G.courts.length} sân`;
+  state.date=null;
+  const av=sportsAvailable(), pref=state._sportPref;
+  state.sport = av.length<=1 ? "all"
+    : (pref && (pref==="all"||av.includes(pref))) ? pref
+    : (av.includes("badminton")?"badminton":av[0]);
+  renderKpis(); syncControls(); render();
+}
+
+function monitoredSet(){ return new Set((DATA&&DATA.monitored)||[]); }
+// chỉ số các sân HIỂN THỊ ở dropdown = sân đang theo dõi (chọn để cào);
+// nếu chưa cấu hình sân nào thì tạm hiện tất cả (trừ demo).
+function visibleBranchIdx(){
+  const mon=monitoredSet();
+  let idx=DATA.branches.map((g,i)=>i).filter(i=>DATA.branches[i].branch!=='demo'
+    && (mon.size? mon.has(DATA.branches[i].branch):true));
+  if(!idx.length) idx=DATA.branches.map((g,i)=>i).filter(i=>DATA.branches[i].branch!=='demo');
+  return idx;
+}
+function fillBranchSelect(){
+  const idx=visibleBranchIdx();
+  document.getElementById('branchSel').innerHTML=
+    idx.map(i=>`<option value="${i}">${DATA.branches[i].branch_name}</option>`).join('');
+  return idx;
+}
+function initialBranchIdx(idx){
+  if(state._branchPref){ const j=DATA.branches.findIndex(g=>g.branch===state._branchPref);
+    if(j>=0 && idx.includes(j)) return j; }   // khôi phục sân đã chọn nếu còn theo dõi
+  return idx[0];
+}
+function boot(payload){
+  loadPrefs();   // khôi phục lựa chọn đã lưu (range, T2–T6, môn, sân, tìm slot, tab)
+  DATA=payload;
+  if(!payload.branches||!payload.branches.length){
+    document.getElementById('board').innerHTML='<p class="hint">Chưa có dữ liệu sân — máy cào chưa gửi lên lần nào.</p>';
+    document.getElementById('kpis').innerHTML='';
+    return;
+  }
+  const idx=fillBranchSelect();
+  document.getElementById('branchSel').onchange=e=>selectBranch(+e.target.value);
+  selectBranch(initialBranchIdx(idx));
+}
+
+// events
+document.getElementById('viewSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
+  state.view=b.dataset.v; syncControls(); render(); };
+function onRangeChange(){
+  let a=document.getElementById('rangeFrom').value, b=document.getElementById('rangeTo').value;
+  if(b<=a) b=addMinG(a, G.slot_minutes||30);   // đảm bảo to > from
+  state.range={start:a,end:b}; renderKpis(); syncControls(); render();
+}
+document.getElementById('rangeFrom').onchange=onRangeChange;
+document.getElementById('rangeTo').onchange=onRangeChange;
+document.getElementById('wdChk').onchange=e=>{state.wd=e.target.checked; render();};
+document.getElementById('daySel').onchange=e=>{state.date=e.target.value; render();};
+document.getElementById('sportSel').onchange=e=>{state.sport=e.target.value; renderKpis(); render();};
+document.getElementById('addBtn').onclick=()=>{
+  const inp=document.getElementById('addBranch'); const id=inp.value.trim();
+  if(!/^[a-z0-9_\-]{2,80}$/.test(id)){ document.getElementById('saveMsg').textContent='branchId không hợp lệ'; return; }
+  if(!DIR.branches.some(b=>b.id===id)) DIR.branches.unshift({id,name:id,sport:'',monitored:true,has_data:false});
+  else DIR.branches.find(b=>b.id===id).monitored=true;
+  inp.value=''; drawDir();
+};
+document.getElementById('crawlBtn').onclick=()=>{
+  const btn=document.getElementById('crawlBtn'); if(btn.disabled) return;
+  document.getElementById('crawlState').innerHTML='<span style="color:var(--accent)">● Bắt đầu…</span>';
+  fetch('/api/crawl/run',{method:'POST'}).then(r=>r.json()).then(res=>{
+    if(!res.ok) document.getElementById('crawlState').textContent='Lỗi: '+(res.error||'?');
+    setTimeout(fetchCrawl,500);
+  }).catch(e=>{ document.getElementById('crawlState').textContent='Lỗi: '+e; });
+};
+document.getElementById('saveBtn').onclick=()=>{
+  const sel=currentSelection(); const msg=document.getElementById('saveMsg');
+  let dw=parseInt(document.getElementById('daysWindow').value,10);
+  if(!(dw>=1&&dw<=60)) dw=21;
+  msg.textContent='Đang lưu…';
+  fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({branches:sel, days_window:dw})}).then(r=>r.json()).then(d=>{
+    if(!d.ok){ msg.textContent='Lỗi: '+(d.error||'?'); return; }
+    CFG=d;
+    msg.textContent=`✓ Đã lưu ${d.branches.length} sân · ${d.days_window} ngày. Đang cập nhật view…`;
+    // horizon đổi → nạp lại dữ liệu để view/coverage áp cửa sổ mới
+    reloadData(()=>{ msg.textContent=`✓ Đã lưu ${d.branches.length} sân · ${d.days_window} ngày. Chạy: python scheduler.py --once`; });
+  }).catch(e=>{ msg.textContent='Lỗi: '+e; });
+};
+function reloadData(cb){
+  const keep=G?G.branch:state._branchPref;
+  loadCourts().then(p=>{
+    DATA=p;
+    if(!p.branches||!p.branches.length){ if(cb)cb(); return; }
+    const idx=fillBranchSelect();
+    let i=keep?p.branches.findIndex(x=>x.branch===keep):-1;
+    if(i<0||!idx.includes(i)) i=idx[0];
+    delete p.branches[i].__occ; selectBranch(i);
+    if(cb)cb();
+  }).catch(()=>{ if(cb)cb(); });
+}
+
+/* ---- trang công khai: dữ liệu do crawler đẩy lên /api/courts ---- */
+function loadCourts(){
+  return fetch('api/courts',{cache:'no-store'}).then(r=>{
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(j=>{
+    window.LAST_AT=j.updatedAt||null;
+    const el=document.getElementById('pubStamp');
+    if(el){
+      if(j.updatedAt){
+        // Cào theo yêu cầu (không tự động) nên dữ liệu cũ là bình thường — chỉ nói rõ tuổi của nó.
+        const t=new Date(j.updatedAt), mins=Math.max(0,Math.round((Date.now()-t)/60000));
+        const age=mins<1?'vừa xong':mins<60?mins+' phút trước':mins<2880?Math.round(mins/60)+' giờ trước':Math.round(mins/1440)+' ngày trước';
+        let admin=false; try{ admin=!!localStorage.getItem('caulong_pass'); }catch(e){}
+        el.textContent='cào lúc '+t.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
+          +' · '+age+(mins>180?(admin?' · bấm Cào ngay để lấy mới':' · sân có thể đã thay đổi'):'');
+        el.style.color=mins>180?'#B7601F':'';
+      } else el.textContent='chưa có dữ liệu';
+    }
+    return expandCourts(j.data||{branches:[],count:0,monitored:[]});
+  });
+}
+/* push_web.py nén occupied thành chuỗi theo sân × ngày — giải nén về đúng shape viz cần */
+function expandCourts(p){
+  (p.branches||[]).forEach(g=>{
+    if(!g.occ) return;
+    const occ=[...(g.occ_extra||[])], codes=g.occ_codes||[];
+    Object.entries(g.occ).forEach(([court,ds])=>Object.entries(ds).forEach(([date,row])=>{
+      for(let i=0;i<row.length;i++){ const ch=row[i]; if(ch==='.') continue;
+        occ.push({court,date,slot:g.slots[i],status:codes[ch.charCodeAt(0)-97]||'booked'}); }
+    }));
+    g.occupied=occ; delete g.occ; delete g.occ_extra;
+  });
+  return p;
+}
+/* Nút "Cào ngay": chỉ hiện khi máy này đã đăng nhập quản trị ở app sổ (chung domain nên
+   đọc được mật khẩu đã lưu). Vercel kiểm lại mật khẩu rồi mới gọi server cào. */
+(function(){
+  let pass=''; try{ pass=localStorage.getItem('caulong_pass')||''; }catch(e){}
+  const b=document.getElementById('crawlNow'); if(!pass||!b) return;
+  b.hidden=false;
+  b.onclick=async()=>{
+    const el=document.getElementById('pubStamp'), before=window.LAST_AT;
+    b.disabled=true; el.style.color=''; el.textContent='đang gửi lệnh cào…';
+    try{
+      const r=await fetch('api/courts?action=crawl',{method:'POST',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify({pass})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(j.error||('HTTP '+r.status));
+      el.textContent='⟳ server đang cào… vài phút, trang tự cập nhật';
+      for(let i=0;i<45;i++){                       // hỏi lại mỗi 20s, tối đa 15 phút
+        await new Promise(r=>setTimeout(r,20000));
+        const j2=await fetch('api/courts',{cache:'no-store'}).then(r=>r.json()).catch(()=>null);
+        if(j2&&j2.updatedAt&&j2.updatedAt!==before) break;
+      }
+      reloadData();
+    }catch(e){ el.style.color='#B23B3B'; el.textContent='✗ '+e.message; }
+    b.disabled=false;
+  };
+})();
+loadCourts().then(boot).catch(err=>{
+  document.getElementById('board').innerHTML='<p class="hint">Không tải được dữ liệu: '+err+'</p>';
+});
+</script>
+</body>
+</html>

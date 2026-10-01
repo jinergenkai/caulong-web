@@ -14,6 +14,8 @@ import { timingSafeEqual } from "node:crypto";
 const PORT = process.env.PORT || 3210;
 const PASS = process.env.ADMIN_PASS || "1234";
 const STORE = new URL("./dev-data.json", import.meta.url);
+const COURTS = new URL("./dev-courts.json", import.meta.url);
+const CRAWLER_TOKEN = process.env.CRAWLER_TOKEN || "dev";
 const EMPTY = { v: 3, sessions: [], members: [], flags: {}, qr: "", note: "" };
 
 async function readStore() {
@@ -34,6 +36,27 @@ const json = (res, code, obj) => {
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
+
+  if (url.pathname === "/api/courts") {          // giả lập api/courts.js
+    if (req.method === "POST" && url.searchParams.get("action") === "crawl") {
+      let raw = ""; for await (const c of req) raw += c;
+      let body = {}; try { body = JSON.parse(raw); } catch {}
+      if (!passOk(body.pass)) return json(res, 401, { error: "Sai mật khẩu quản trị." });
+      return json(res, 200, { ok: true, dev: "giả lập — không cào thật" });
+    }
+    if (req.method === "GET") {
+      if (!existsSync(COURTS)) return json(res, 200, { updatedAt: null, data: null });
+      return json(res, 200, JSON.parse(await readFile(COURTS, "utf8")));
+    }
+    if (req.method === "POST") {
+      if ((req.headers.authorization || "") !== "Bearer " + CRAWLER_TOKEN) return json(res, 401, { error: "Sai token." });
+      let raw = ""; for await (const c of req) raw += c;
+      const body = JSON.parse(raw || "{}");
+      if (!Array.isArray(body.branches)) return json(res, 400, { error: "Thiếu branches" });
+      await writeFile(COURTS, JSON.stringify({ updatedAt: new Date().toISOString(), data: body }));
+      return json(res, 200, { ok: true, branches: body.branches.length });
+    }
+  }
 
   if (url.pathname === "/api/data") {
     if (req.method === "GET") return json(res, 200, await readStore());

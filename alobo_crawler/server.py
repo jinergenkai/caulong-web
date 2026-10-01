@@ -14,6 +14,9 @@ sample_*.json co san de xem thu ngay.
 from __future__ import annotations
 
 import argparse
+import hmac
+import ipaddress
+import time
 import datetime as dt
 import glob
 import json
@@ -377,6 +380,48 @@ def auto_crawl_loop(interval_min: int, crawl_now: bool = True):
         time.sleep(interval_min * 60)
 
 
+# ---- bảo vệ khi mở server ra internet (--host 0.0.0.0) ----
+# Máy trong nhà / LAN / Tailscale: dùng như cũ, không cần gì.
+# Từ ngoài internet: CHỈ được gọi POST /api/crawl/run, và phải kèm
+#   Authorization: Bearer <TRIGGER_TOKEN>   (mặc định = PUSH_TOKEN trong .env)
+# POST /api/config (đổi danh sách sân) thì không bao giờ cho từ ngoài.
+_TAILSCALE = ipaddress.ip_network("100.64.0.0/10")
+PUBLIC_COOLDOWN_SEC = 120          # chặn bấm dồn từ web → né rate limit Alobo
+_last_public_trigger = [0.0]
+
+
+def _env(name: str) -> str:
+    v = os.environ.get(name)
+    if v:
+        return v.strip()
+    p = os.path.join(HERE, ".env")
+    if os.path.exists(p):
+        for line in open(p, encoding="utf-8"):
+            if "=" in line and not line.lstrip().startswith("#"):
+                k, val = line.split("=", 1)
+                if k.strip() == name:
+                    return val.strip().strip('"').strip("'")
+    return ""
+
+
+def _is_local(ip: str) -> bool:
+    try:
+        a = ipaddress.ip_address(ip.split("%")[0])
+    except ValueError:
+        return False
+    if getattr(a, "ipv4_mapped", None):
+        a = a.ipv4_mapped
+    return a.is_loopback or a.is_private or a in _TAILSCALE
+
+
+def _token_ok(header: str) -> bool:
+    want = _env("TRIGGER_TOKEN") or _env("PUSH_TOKEN")
+    if not want:
+        return False
+    given = (header or "").removeprefix("Bearer ").strip()
+    return hmac.compare_digest(given.encode(), want.encode())
+
+
 class Handler(BaseHTTPRequestHandler):
     data_dir = "data"
 
@@ -431,8 +476,22 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split("?", 1)[0]
+        if not _is_local(self.client_address[0]):
+            # gọi từ internet (Vercel): chỉ cho kích cào, có token, có giãn cách
+            if path != "/api/crawl/run" or not _token_ok(self.headers.get("Authorization", "")):
+                self._send(401, json.dumps({"ok": False, "error": "không có quyền"}).encode(),
+                           "application/json; charset=utf-8")
+                return
+            wait = PUBLIC_COOLDOWN_SEC - (time.time() - _last_public_trigger[0])
+            if wait > 0:
+                self._send(429, json.dumps({"ok": False, "error": f"vừa cào xong, đợi {int(wait)}s"},
+                                           ensure_ascii=False).encode("utf-8"),
+                           "application/json; charset=utf-8")
+                return
         if path == "/api/crawl/run":
             res = start_crawl()
+            if res.get("ok") and not _is_local(self.client_address[0]):
+                _last_public_trigger[0] = time.time()
             self._send(200 if res.get("ok") else 409,
                        json.dumps(res, ensure_ascii=False).encode("utf-8"),
                        "application/json; charset=utf-8")
