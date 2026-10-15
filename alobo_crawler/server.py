@@ -404,6 +404,32 @@ def _env(name: str) -> str:
     return ""
 
 
+_trusted_cache: dict = {}
+
+
+def _trusted_nets():
+    """TRUSTED_NETS="127.0.0.0/8,192.168.1.0/24" → chỉ các mạng này được coi là "máy nhà".
+    Chưa đặt → giữ hành vi cũ (mọi IP private + Tailscale).
+    ⚠ Đứng sau relay/proxy (vd Linode → WireGuard → home): request internet đến với IP
+    WireGuard của relay, là IP private → PHẢI đặt TRUSTED_NETS và KHÔNG gồm dải WireGuard,
+    nếu không người ngoài sẽ được coi là máy nhà và bỏ qua token."""
+    raw = _env("TRUSTED_NETS")
+    if not raw:
+        return None
+    if _trusted_cache.get("raw") == raw:
+        return _trusted_cache["nets"]
+    nets = []
+    for part in raw.split(","):
+        part = part.strip()
+        if part:
+            try:
+                nets.append(ipaddress.ip_network(part, strict=False))
+            except ValueError:
+                print(f"  [TRUSTED_NETS] bỏ qua giá trị sai: {part}")
+    _trusted_cache.update(raw=raw, nets=nets)
+    return nets
+
+
 def _is_local(ip: str) -> bool:
     try:
         a = ipaddress.ip_address(ip.split("%")[0])
@@ -411,6 +437,9 @@ def _is_local(ip: str) -> bool:
         return False
     if getattr(a, "ipv4_mapped", None):
         a = a.ipv4_mapped
+    nets = _trusted_nets()
+    if nets is not None:
+        return any(a.version == n.version and a in n for n in nets)
     return a.is_loopback or a.is_private or a in _TAILSCALE
 
 
@@ -555,6 +584,11 @@ def main():
     else:
         print("  [auto-crawl] TẮT — cào tay ở tab Cào dữ liệu, hoặc thêm --crawl, hoặc cron.")
 
+    tn = _trusted_nets()
+    print("  [bảo vệ] tin cậy: " + (", ".join(map(str, tn)) if tn is not None
+          else "mọi IP private + Tailscale (chưa đặt TRUSTED_NETS)"))
+    print("  [bảo vệ] token cho lệnh cào từ ngoài: " + ("CÓ" if (_env("TRIGGER_TOKEN") or _env("PUSH_TOKEN"))
+          else "CHƯA ĐẶT → mọi lệnh từ ngoài bị từ chối"))
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"\n  http://{args.host}:{args.port}\n  Ctrl+C để dừng.")
     try:

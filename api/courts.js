@@ -60,7 +60,11 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
-      if (!tokenOk(req.headers.authorization)) return res.status(401).json({ error: "Sai token." });
+      if (!process.env.CRAWLER_TOKEN) {
+        // nói rõ để khỏi nhầm với "sai token" — thường do đặt biến xong chưa Redeploy
+        return res.status(503).json({ error: "Vercel chưa có CRAWLER_TOKEN (đặt xong phải Redeploy)." });
+      }
+      if (!tokenOk(req.headers.authorization)) return res.status(401).json({ error: "Sai token (PUSH_TOKEN khác CRAWLER_TOKEN)." });
       const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
       if (!body || !Array.isArray(body.branches)) {
         return res.status(400).json({ error: "Thiếu branches — gửi đúng đầu ra load_data()." });

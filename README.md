@@ -142,6 +142,14 @@ Muốn nút Cào ngay: chạy `python server.py --host 0.0.0.0` và mở cổng 
 gọi được đúng `POST /api/crawl/run`, phải có token, cách nhau tối thiểu 2 phút; đổi danh sách
 sân vẫn chỉ làm được từ máy nhà/LAN/Tailscale.
 
+Cài thành service (tự chạy lại khi crash/khởi động máy) — xem `alobo_crawler/deploy/alobo-service.sh help`:
+
+```bash
+./alobo_crawler/deploy/alobo-service.sh setup                 # home server, 1 lần, không sudo
+sudo ./alobo_crawler/deploy/alobo-service.sh install          # home server, chỉ cào khi bấm trên web
+sudo ./alobo_crawler/deploy/alobo-service.sh relay-install <IP WireGuard của home>   # trên Linode
+```
+
 Sửa giao diện heatmap: sửa `alobo_crawler/viz/index.html` rồi chạy
 `python alobo_crawler/make_courts_page.py` — **đừng sửa tay `courts.html`**.
 

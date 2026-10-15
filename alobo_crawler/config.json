@@ -1,10 +1,6 @@
 {
   "branches": [
-    "sport_bui_thi_xuan_badminton",
-    "sport_san_cau_long_tan_binh",
-    "sport_san_cau_long_k3",
-    "sport_nu_cuoi_badminton",
-    "sport_sky_phu_nhuan"
+    "sport_san_cau_long_tan_binh"
   ],
   "days_window": 21,
   "weekdays_only": false,
